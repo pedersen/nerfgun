@@ -24,6 +24,8 @@ keywords:
 
 ## Install 9-DOF Sensor
 
+* Using `sudo raspi-config` make sure the raspberry pi serial port is enabled, but
+  the login shell on the serial port is *disabled*.
 * [This guide](https://www.digikey.com/htmldatasheets/production/1833950/0/0/1/bno055-with-raspberry-pi-beaglebone-black.html)
   was extremely helpful, though it did have some inaccuracies three years later. In
   particular, you will need to take the following steps before actually beginning to
@@ -40,4 +42,19 @@ keywords:
 * You now have the 9-DOF sensor installed, working, and ready to go.
 
 ## Configure As Bluetooth Keyboard and Mouse
+
+Now, we need to get packages installed to enable the ZeroWH to be a bluetooth keyboard
+and mouse. I'm reusing [code and configuration](https://thanhle.me/emulate-bluetooth-mouse-with-raspberry-pi/)
+to accomplish this. Here's the steps to get the packages and configs in place:
+
+```shell
+sudo apt install -y bluez bluez-tools bluez-firmware
+sudo apt install -y python3-bluez python3-dbus python3-pyudev \
+    python3-evdev python3-gi
+
+sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
+sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service
+sudo systemctl daemon-reload
+sudo systemctl restart bluetooth
+```
 
