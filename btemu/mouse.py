@@ -1,12 +1,12 @@
+import logging
 import sys
 import dbus
-import dbus.service
-import dbus.mainloop.glib
+
+from .rootcheck import rootcheck
 
 
 class MouseClient():
 	def __init__(self):
-		super().__init__()
 		self.state = [0, 0, 0, 0]
 		self.bus = dbus.SystemBus()
 		self.btkservice = self.bus.get_object('org.thanhle.btkbservice', '/org/thanhle/btkbservice')
@@ -16,11 +16,12 @@ class MouseClient():
 		try:
 			self.iface.send_mouse(0, bytes(self.state))
 		except OSError as err:
-			error(err)
+			logging.error(err)
 
 
-if __name__ == "__main__":
-	if (len(sys.argv) < 5):
+def main():
+	rootcheck()
+	if len(sys.argv) < 5:
 		print("Usage: mouse_emulate [button_num dx dy dz]")
 		exit()
 	client = MouseClient()
@@ -31,3 +32,6 @@ if __name__ == "__main__":
 	print("state:", client.state)
 	client.send_current()
 
+
+if __name__ == "__main__":
+	main()

@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #
 # thanhle Bluetooth keyboard/Mouse emulator DBUS Service
 #
@@ -17,7 +16,8 @@ from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
 
-from btemu import constants
+from . import constants
+from .rootcheck import rootcheck
 
 
 class BTKbDevice():
@@ -86,7 +86,6 @@ class BTKbDevice():
 
 
 class BTKbService(dbus.service.Object):
-
     def __init__(self):
         logging.debug("1. Setting up service")
         # set up as a dbus service
@@ -100,7 +99,7 @@ class BTKbService(dbus.service.Object):
     @dbus.service.method('org.thanhle.btkbservice', in_signature='yay')
     def send_keys(self, modifier_byte, keys):
         logging.debug("Get send_keys request through dbus")
-        logging.debug("key msg: ", keys)
+        logging.debug(f"key msg: {str(keys)}")
         state = [ 0xA1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ]
         state[2] = int(modifier_byte)
         count = 4
@@ -121,16 +120,17 @@ class BTKbService(dbus.service.Object):
         self.device.send_string(state)
 
 
-# main routine
-if __name__ == "__main__":
-    # we can only run as root
+def main():
+    rootcheck()
     try:
-        if not os.geteuid() == 0:
-            sys.exit("Only root can run this script")
-
         DBusGMainLoop(set_as_default=True)
         myservice = BTKbService()
         loop = GLib.MainLoop()
         loop.run()
     except KeyboardInterrupt:
         sys.exit()
+
+
+# main routine
+if __name__ == "__main__":
+    main()

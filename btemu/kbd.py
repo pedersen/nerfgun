@@ -11,13 +11,13 @@
 #
 # Ported to a Python module by Thanh Le
 
-import sys  # used to exit the script
-import dbus
-import dbus.service
-import dbus.mainloop.glib
+import sys
 import time
 
+import dbus
+
 from . import constants
+from .rootcheck import rootcheck
 
 
 class InvalidKeyCode(Exception):
@@ -92,9 +92,14 @@ class Keyboard:
             time.sleep(constants.KEY_DELAY)
 
 
-def main(args):
+def main():
+    rootcheck()
+    if len(sys.argv) < 2:
+        print("Usage: send_string <string to send>")
+        sys.exit(1)
+
     dc = Keyboard()
-    for s in args:
+    for s in sys.argv[1:]:
         print("Sending " + s)
         dc.send_string(s)
         dc.send_string(" ")
@@ -102,7 +107,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: send_string <string to send>")
-        sys.exit(1)
-    main(sys.argv[1:])
+    main()
