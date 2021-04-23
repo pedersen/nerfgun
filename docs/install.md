@@ -48,9 +48,10 @@ and mouse. I'm reusing [code and configuration](https://thanhle.me/emulate-bluet
 to accomplish this. Here's the steps to get the packages and configs in place:
 
 ```shell
-sudo apt install -y bluez bluez-tools bluez-firmware
-sudo apt install -y python3-bluez python3-dbus python3-pyudev \
+sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev
+sudo apt install -y python3-dbus python3-pyudev \
     python3-evdev python3-gi
+sudo pip install pybluez
 
 sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
 sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service

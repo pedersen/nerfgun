@@ -92,12 +92,17 @@ class Keyboard:
             time.sleep(constants.KEY_DELAY)
 
 
-if __name__ == "__main__":
-    if(len(sys.argv) < 2):
-        print("Usage: send_string <string to send>")
-        sys.exit(1)
+def main(args):
     dc = Keyboard()
-    for s in sys.argv[1:]:
+    for s in args:
         print("Sending " + s)
         dc.send_string(s)
+        dc.send_string(" ")
         print("Done.")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: send_string <string to send>")
+        sys.exit(1)
+    main(sys.argv[1:])
