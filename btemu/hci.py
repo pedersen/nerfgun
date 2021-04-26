@@ -17,10 +17,15 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 
 from . import constants
+from .agent import Agent
 from .rootcheck import rootcheck
 
+BUS_NAME = 'org.bluez'
+AGENT_INTERFACE = 'org.bluez.Agent1'
+AGENT_PATH = "/test/agent"
 
-class BTKbDevice():
+
+class BTKbDevice:
     MY_ADDRESS = bluetooth.read_local_bdaddr()
     MY_DEV_NAME = constants.DEV_NAME
 
@@ -124,6 +129,19 @@ def main():
     rootcheck()
     try:
         DBusGMainLoop(set_as_default=True)
+
+        capability = "NoInputNoOutput"
+        bus = dbus.SystemBus()
+        path = "/test/agent"
+        agent = Agent(bus, path)
+        obj = bus.get_object(BUS_NAME, "/org/bluez")
+        manager = dbus.Interface(obj, "org.bluez.AgentManager1")
+        manager.RegisterAgent(path, capability)
+
+        logging.debug("Agent registered")
+
+        manager.RequestDefaultAgent(path)
+
         myservice = BTKbService()
         loop = GLib.MainLoop()
         loop.run()

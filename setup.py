@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
 
 install_requirements = [
+    'Adafruit-GPIO>=0.9.3',
     'dbus-python',
     'pybluez,'
     'pygobject',
+    'pyhocon',
+    'pyserial',
     'python-evdev',
     'pyudev',
 ]
