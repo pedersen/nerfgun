@@ -1,0 +1,13 @@
+[Unit]
+Description=Raspberry Pi Power Button
+After=rc-local
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/btemu-power
+LimitNPROC=1
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
