@@ -3,6 +3,7 @@
 set -x
 set -e
 
+sudo passwd pi
 sudo raspi-config nonint do_expand_rootfs
 sudo raspi-config nonint do_ssh 0
 sudo raspi-config nonint do_serial 1 0
