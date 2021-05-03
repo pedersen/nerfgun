@@ -1,3 +1,5 @@
 /.idea/
 /nerfgun.iml
 /btemu.egg-info/
+/build/
+/dist/
