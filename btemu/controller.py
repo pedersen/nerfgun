@@ -48,7 +48,6 @@ def mainloop(keys, mouse, cycle, mouse_repeat):
                 pin.transition = now
 
         for pin in mousepins:
-            # TODO: Fix up auto-repeat of mouse clicks
             # TODO: Fix up using the 9-DOF sensor once new soldering iron arrives
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
@@ -60,6 +59,9 @@ def mainloop(keys, mouse, cycle, mouse_repeat):
                 pin.transition = now
                 pointer.send_current()
             if state == GPIO.HIGH and now - mouse_repeat >= pin.transition:
+                pointer.state[0] = 0
+                pointer.send_current()
+                pointer.state[0] = pin.code
                 pointer.send_current()
                 pin.transition = now
         time.sleep(cycle)
