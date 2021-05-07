@@ -34,3 +34,11 @@ class BtConfig:
             pin = int(key.replace('pin_', ''))
             tbl[pin] = int(tree.get(key))
         return tbl
+
+    @property
+    def cycle(self):
+        return 1000.0/float(self.conf.get('btemu.pollrate'))/1000.0  # number of ms between polling as part of a second
+
+    @property
+    def mouse_repeat(self):
+        return float(self.conf.get('btemu.mouse-repeat'))/1000.0 # number of ms between repeat as part of a second

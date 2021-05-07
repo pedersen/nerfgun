@@ -33,6 +33,7 @@ setup(
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
             'btemu-power = btemu.power:main',
+            'btemu-controller = btemu.controller:main',
         ],
     },
 )
