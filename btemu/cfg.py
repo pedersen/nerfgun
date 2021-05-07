@@ -14,17 +14,19 @@ class BtConfig:
 
     @property
     def keyboardpins(self):
-        tbl = {}
+        keytbl = {}
+        modtbl = {}
         tree = self.conf.get('btemu.keyboard.pins')
         for key in tree:
             pin = int(key.replace('pin_', ''))
             key = tree.get(key).upper()
             code = keytable.get(f'KEY_{key}', None)
-            if code is None:
-                code = modkeys.getf('KEY_{key}', None)
             if code is not None:
-                tbl[pin] = code
-        return tbl
+                keytbl[pin] = code
+            code = modkeys.get(f'KEY_{key}', None)
+            if code is not None:
+                modtbl[pin] = code
+        return keytbl, modtbl
 
     @property
     def mousepins(self):

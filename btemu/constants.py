@@ -164,6 +164,7 @@ keytable = {
     "KEY_F23" : 114,
     "KEY_F24" : 115
 }
+codekeys = {v: k for k, v in keytable.items()}
 
 # Map modifier keys to array element in the bit array
 modkeys = {
@@ -176,6 +177,7 @@ modkeys = {
     "KEY_LEFTSHIFT": 6,
     "KEY_LEFTCTRL": 7
 }
+codemods = {v: k for k, v in modkeys.items()}
 
 KEY_DOWN_TIME = 0.01
 KEY_DELAY = 0.01

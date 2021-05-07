@@ -5,6 +5,7 @@ from optparse import OptionParser
 
 import sys
 
+from btemu import constants
 from btemu.cfg import BtConfig
 from btemu.kbd import Keyboard
 from btemu.mouse import MouseClient
@@ -17,13 +18,15 @@ class PinState:
     state: int
     transition: float
     code: int
+    key: str
 
 
-def mainloop(keys, mouse, cycle, mouse_repeat):
+def mainloop(keys, mods, mouse, cycle, mouse_repeat):
     now = time.time()
 
-    keypins = [PinState(x, GPIO.PUD_DOWN, now, keys[x]) for x in keys.keys()]
-    mousepins = [PinState(x, GPIO.PUD_DOWN, now, mouse[x]) for x in mouse.keys()]
+    keypins = [PinState(x, GPIO.LOW, now, keys[x], x) for x in keys.keys()]
+    modpins = [PinState(x, GPIO.LOW, now, mods[x], x) for x in mods.keys()]
+    mousepins = [PinState(x, GPIO.LOW, now, mouse[x], x) for x in mouse.keys()]
 
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
@@ -34,15 +37,28 @@ def mainloop(keys, mouse, cycle, mouse_repeat):
     keyboard = Keyboard()
     pointer = MouseClient()
 
+    print("Polling mouse and keyboard events")
     while True:
         now = time.time()
         for pin in keypins:
-            # TODO: Handle modifier keys properly
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
                 if state == GPIO.HIGH:
                     keyboard.send_key_down(pin.code)
                 else:
+                    keyboard.send_key_up()
+                pin.state = state
+                pin.transition = now
+
+        for pin in modpins:
+            state = GPIO.input(pin.pinnum)
+            if state != pin.state:
+                if state == GPIO.HIGH:
+                    keycode = constants.codemods[pin.code]
+                    keyboard.state[2][pin.code] = 1
+                    keyboard.send_key_down(constants.keytable[keycode])
+                else:
+                    keyboard.state[2][pin.code] = 0
                     keyboard.send_key_up()
                 pin.state = state
                 pin.transition = now
@@ -58,7 +74,7 @@ def mainloop(keys, mouse, cycle, mouse_repeat):
                 pin.state = state
                 pin.transition = now
                 pointer.send_current()
-            if state == GPIO.HIGH and now - mouse_repeat >= pin.transition:
+            if (state == GPIO.HIGH) and (pin.transition + mouse_repeat) <= now:
                 pointer.state[0] = 0
                 pointer.send_current()
                 pointer.state[0] = pin.code
@@ -78,12 +94,12 @@ def main():
         sys.exit(2)
     try:
         cfg = BtConfig(options.filename)
-        keys = cfg.keyboardpins
+        keys, mods = cfg.keyboardpins
         mouse = cfg.mousepins
         cycle = cfg.cycle
         mouse_repeat = cfg.mouse_repeat
 
-        mainloop(keys, mouse, cycle, mouse_repeat)
+        mainloop(keys, mods, mouse, cycle, mouse_repeat)
     except KeyboardInterrupt:
         sys.exit()
 
