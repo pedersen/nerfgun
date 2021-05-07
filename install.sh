@@ -23,6 +23,7 @@ sudo update-alternatives --auto python
 
 sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev
 sudo apt install -y python3-dbus python3-pyudev python3-evdev python3-gi
+sudo apt install -y libcairo2-dev
 sudo pip3 install pybluez
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -34,7 +35,10 @@ cd ${SCRIPT_DIR}
 test -d nerfgun || git clone https://github.com/pedersen/nerfgun.git
 cd nerfgun
 sudo python setup.py install
+sudo cp btemu/btemu.conf /etc/btemu.conf
 sudo cp sysconfigs/btemu-power.service /lib/systemd/system/btemu-power.service
+sudo cp sysconfigs/btemu-agent.service /lib/systemd/system/btemu-agent.service
+sudo cp sysconfigs/btemu-hci.service /lib/systemd/system/btemu-hci.service
 sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
 sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service
 
@@ -42,5 +46,9 @@ sudo systemctl enable btemu-power
 sudo systemctl restart btemu-power
 sudo systemctl daemon-reload
 sudo systemctl restart bluetooth
+sudo systemctl enable btemu-agent
+sudo systemctl restart btemu-agent
+sudo systemctl enable btemu-hci
+sudo systemctl restart btemu-hci
 
 sudo shutdown -r now

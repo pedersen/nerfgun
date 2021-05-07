@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 install_requirements = [
     'Adafruit-GPIO>=0.9.3',
     'dbus-python',
-    'pybluez,'
+    'pybluez',
     'pygobject',
     'pyhocon',
     'pyserial',
-    'python-evdev',
+    'evdev',
     'pyudev',
 ]
 
@@ -25,7 +25,7 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=install_requirements,
     entry_points={
         'console_scripts': [
             'btemu-serve = btemu.hci:main',

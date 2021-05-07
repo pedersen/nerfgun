@@ -3,10 +3,15 @@
 #
 
 import logging
-import os
 import socket
+import subprocess
 import sys
+
+from btemu.cfg import BtConfig
+
 logging.basicConfig(level=logging.DEBUG)
+
+from optparse import OptionParser
 
 import bluetooth
 import dbus
@@ -17,7 +22,6 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 
 from . import constants
-from .agent import Agent
 from .rootcheck import rootcheck
 
 BUS_NAME = 'org.bluez'
@@ -37,14 +41,15 @@ class BTKbDevice:
         self.init_bluez_profile()
 
     # configure the bluetooth hardware device
-    def init_bt_device(self):
+    @staticmethod
+    def init_bt_device():
         logging.debug("3. Configuring Device name " + BTKbDevice.MY_DEV_NAME)
         # set the device class to a keybord and set the name
-        os.system("hciconfig hci0 up")
-        os.system("hciconfig hci0 class 0x0025C0")
-        os.system("hciconfig hci0 name " + BTKbDevice.MY_DEV_NAME)
+        subprocess.run(["hciconfig", "hci0", "up"])
+        subprocess.run(["hciconfig", "hci0", "class", "0x0025C0"])
+        subprocess.run(["hciconfig", "hci0", "name", BTKbDevice.MY_DEV_NAME])
         # make the device discoverable
-        os.system("hciconfig hci0 piscan")
+        subprocess.run(["hciconfig", "hci0", "piscan"])
 
     # set up a bluez profile to advertise device capabilities from a loaded service record
     def init_bluez_profile(self):
@@ -127,21 +132,18 @@ class BTKbService(dbus.service.Object):
 
 def main():
     rootcheck()
+    parser = OptionParser()
+    parser.add_option("-c", "--conf", dest="filename",
+                      help="path of config file to use", metavar="FILE")
+    (options, args) = parser.parse_args()
+    if not options.filename:
+        print(parser.usage)
+        print("*** Must supply config file parameter!")
+        sys.exit(2)
     try:
+        cfg = BtConfig(options.filename)
+        BTKbDevice.MY_DEV_NAME = cfg.devname
         DBusGMainLoop(set_as_default=True)
-
-        capability = "NoInputNoOutput"
-        bus = dbus.SystemBus()
-        path = "/test/agent"
-        agent = Agent(bus, path)
-        obj = bus.get_object(BUS_NAME, "/org/bluez")
-        manager = dbus.Interface(obj, "org.bluez.AgentManager1")
-        manager.RegisterAgent(path, capability)
-
-        logging.debug("Agent registered")
-
-        manager.RequestDefaultAgent(path)
-
         myservice = BTKbService()
         loop = GLib.MainLoop()
         loop.run()

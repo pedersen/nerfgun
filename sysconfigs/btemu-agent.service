@@ -1,9 +1,9 @@
 [Unit]
-Description=Raspberry Pi Power Button
+Description=Raspberry Pi Custom Controller Bluetooth Agent
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/btemu-power
+ExecStart=/usr/local/bin/btemu-agent
 LimitNPROC=1
 ProtectHome=true
 ProtectSystem=full
