@@ -67,11 +67,11 @@ class Keyboard:
 
     def send_key_state(self):
         """sends a single frame of the current key state to the emulator server"""
-        bin_str = ""
+        modkeys = 0b00000000
         element = self.state[2]
-        for bit in element:
-            bin_str += str(bit)
-        self.iface.send_keys(int(bin_str, 2), self.state[4:10])
+        for shl, bit in enumerate(element):
+            modkeys |= (bit << (7-shl))
+        self.iface.send_keys(modkeys, self.state[4:10])
 
     def send_key_down(self, scancode):
         """sends a key down event to the server"""

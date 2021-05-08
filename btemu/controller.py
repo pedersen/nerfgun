@@ -40,28 +40,34 @@ def mainloop(keys, mods, mouse, cycle, mouse_repeat):
     print("Polling mouse and keyboard events")
     while True:
         now = time.time()
+        downkeys = []
+        for pin in modpins:
+            state = GPIO.input(pin.pinnum)
+            if state == GPIO.HIGH:
+                keycode = constants.codemods[pin.code]
+                keyboard.state[2][pin.code] = 1
+                downkeys.append(constants.keytable[keycode])
+            else:
+                keyboard.state[2][pin.code] = 0
+            if state != pin.state:
+                pin.state = state
+                pin.transition = now
+
         for pin in keypins:
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
                 if state == GPIO.HIGH:
-                    keyboard.send_key_down(pin.code)
+                    downkeys.append(pin.code)
                 else:
                     keyboard.send_key_up()
                 pin.state = state
                 pin.transition = now
 
-        for pin in modpins:
-            state = GPIO.input(pin.pinnum)
-            if state != pin.state:
-                if state == GPIO.HIGH:
-                    keycode = constants.codemods[pin.code]
-                    keyboard.state[2][pin.code] = 1
-                    keyboard.send_key_down(constants.keytable[keycode])
-                else:
-                    keyboard.state[2][pin.code] = 0
-                    keyboard.send_key_up()
-                pin.state = state
-                pin.transition = now
+        downkeys.extend([0, 0, 0, 0, 0, 0])
+        for idx in range(0, 6):
+            keyboard.state[4+idx] = downkeys[idx]
+
+        keyboard.send_key_state()
 
         for pin in mousepins:
             # TODO: Fix up using the 9-DOF sensor once new soldering iron arrives
