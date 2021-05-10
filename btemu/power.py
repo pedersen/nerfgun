@@ -1,7 +1,10 @@
 #!/usr/bin/env python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+import subprocess
 
 import RPi.GPIO as GPIO
-import subprocess
 
 
 def main():

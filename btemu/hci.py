@@ -1,6 +1,8 @@
 #
 # thanhle Bluetooth keyboard/Mouse emulator DBUS Service
 #
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import logging
 import socket
@@ -137,8 +139,8 @@ def main():
                       help="path of config file to use", metavar="FILE")
     (options, args) = parser.parse_args()
     if not options.filename:
-        print(parser.usage)
-        print("*** Must supply config file parameter!")
+        logging.error("*** Must supply config file parameter!")
+        parser.print_help()
         sys.exit(2)
     try:
         cfg = BtConfig(options.filename)

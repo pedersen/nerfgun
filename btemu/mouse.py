@@ -1,6 +1,9 @@
 import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import sys
 import dbus
+from optparse import OptionParser
 
 from .rootcheck import rootcheck
 
@@ -21,15 +24,18 @@ class MouseClient():
 
 def main():
 	rootcheck()
-	if len(sys.argv) < 5:
-		print("Usage: mouse_emulate [button_num dx dy dz]")
+	parser = OptionParser("usage: %prog button_num dx dy dz")
+	(opts, args) = parser.parse_args()
+	if len(args) != 4:
+		logging.error("must supplu: button_num dx dy dz")
+		parser.print_help()
 		exit()
 	client = MouseClient()
 	client.state[0] = int(sys.argv[1])
 	client.state[1] = int(sys.argv[2])
 	client.state[2] = int(sys.argv[3])
 	client.state[3] = int(sys.argv[4])
-	print("state:", client.state)
+	logging.debug(f"state: {client.state}")
 	client.send_current()
 
 

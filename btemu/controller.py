@@ -1,15 +1,17 @@
-import time
-from dataclasses import dataclass
-import RPi.GPIO as GPIO
-from optparse import OptionParser
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import sys
+import time
+from dataclasses import dataclass
+from optparse import OptionParser
 
-from btemu import constants
-from btemu.cfg import BtConfig
-from btemu.kbd import Keyboard
-from btemu.mouse import MouseClient
-from btemu.rootcheck import rootcheck
+import RPi.GPIO as GPIO
+from . import constants
+from .cfg import BtConfig
+from .kbd import Keyboard
+from .mouse import MouseClient
+from .rootcheck import rootcheck
 
 
 @dataclass
@@ -37,7 +39,7 @@ def mainloop(keys, mods, mouse, cycle, mouse_repeat):
     keyboard = Keyboard()
     pointer = MouseClient()
 
-    print("Polling mouse and keyboard events")
+    logging.info("Polling mouse and keyboard events")
     while True:
         now = time.time()
         downkeys = []
@@ -95,8 +97,8 @@ def main():
                       help="path of config file to use", metavar="FILE")
     (options, args) = parser.parse_args()
     if not options.filename:
-        print(parser.usage)
-        print("*** Must supply config file parameter!")
+        logging.error("*** Must supply config file parameter!")
+        parser.print_help()
         sys.exit(2)
     try:
         cfg = BtConfig(options.filename)

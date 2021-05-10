@@ -11,11 +11,14 @@
 #
 # Ported to a Python module by Thanh Le
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import sys
 import time
+from optparse import OptionParser
 
 import dbus
-
 from . import constants
 from .rootcheck import rootcheck
 
@@ -94,16 +97,19 @@ class Keyboard:
 
 def main():
     rootcheck()
-    if len(sys.argv) < 2:
-        print("Usage: send_string <string to send>")
-        sys.exit(1)
+    parser = OptionParser(usage="usage: %prog string to send")
+    (opts, args) = parser.parse_args()
+    if len(args) == 0:
+        logging.error("Must supply at least one string to send")
+        parser.print_help()
+        sys.exit(2)
 
     dc = Keyboard()
-    for s in sys.argv[1:]:
-        print("Sending " + s)
+    for s in args:
+        logging.info(f"Sending '{s}'")
         dc.send_string(s)
         dc.send_string(" ")
-        print("Done.")
+        logging.info("Done.")
 
 
 if __name__ == "__main__":
