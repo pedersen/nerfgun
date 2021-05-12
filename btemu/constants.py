@@ -305,3 +305,5 @@ UUID = "00001124-0000-1000-8000-00805f9b34fb"
 P_CTRL = 17  # Service port - must match port configured in SDP record
 P_INTR = 19  # Interrupt port - must match port configured in SDP record
 DEV_NAME = "Raspberry Pi Custom Controller"
+DBUS_DOTTED_NAME = "org.thanhle.btkbservice"
+DBUS_PATH_NAME = "/org/thanhle/btkbservice"

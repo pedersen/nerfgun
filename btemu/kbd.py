@@ -42,12 +42,12 @@ def modkey(evdev_keycode):
     return constants.modkeys.get(evdev_keycode, -1)
 
 
-class Keyboard:
+class KeyboardClient:
     def __init__(self):
         # the structure for a bt keyboard input report (size is 10 bytes)
         self.state = [
             0xA1,  # this is an input report
-            0x01,  # Usage report = Keyboard
+            0x01,  # Usage report = KeyboardClient
             # Bit array for Modifier keys
             [0,  # Right GUI - Windows Key
              0,  # Right ALT
@@ -65,8 +65,8 @@ class Keyboard:
             0x00,
             0x00]
         self.bus = dbus.SystemBus()
-        self.btkservice = self.bus.get_object('org.thanhle.btkbservice', '/org/thanhle/btkbservice')
-        self.iface = dbus.Interface(self.btkservice, 'org.thanhle.btkbservice')
+        self.btkservice = self.bus.get_object(constants.DBUS_DOTTED_NAME, constants.DBUS_PATH_NAME)
+        self.iface = dbus.Interface(self.btkservice, constants.DBUS_DOTTED_NAME)
 
     def send_key_state(self):
         """sends a single frame of the current key state to the emulator server"""
@@ -104,7 +104,7 @@ def main():
         parser.print_help()
         sys.exit(2)
 
-    dc = Keyboard()
+    dc = KeyboardClient()
     for s in args:
         logging.info(f"Sending '{s}'")
         dc.send_string(s)

@@ -9,7 +9,7 @@ from optparse import OptionParser
 import RPi.GPIO as GPIO
 from . import constants
 from .cfg import BtConfig
-from .kbd import Keyboard
+from .kbd import KeyboardClient
 from .mouse import MouseClient
 from .rootcheck import rootcheck
 
@@ -23,21 +23,21 @@ class PinState:
     key: str
 
 
-def mainloop(keys, mods, mouse, cycle, mouse_repeat):
+def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
     now = time.time()
 
-    keypins = [PinState(x, GPIO.LOW, now, keys[x], x) for x in keys.keys()]
-    modpins = [PinState(x, GPIO.LOW, now, mods[x], x) for x in mods.keys()]
+    keypins = [PinState(x, GPIO.LOW, now, keycfgs[x], x) for x in keycfgs.keys()]
+    modpins = [PinState(x, GPIO.LOW, now, modcfgs[x], x) for x in modcfgs.keys()]
     mousepins = [PinState(x, GPIO.LOW, now, mouse[x], x) for x in mouse.keys()]
 
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
-    for pin in keys.keys():
+    for pin in keycfgs.keys():
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     for pin in mouse.keys():
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    keyboard = Keyboard()
-    pointer = MouseClient()
+    keyboard = KeyboardClient()
+    mouse = MouseClient()
 
     logging.info("Polling mouse and keyboard events")
     while True:
@@ -75,19 +75,19 @@ def mainloop(keys, mods, mouse, cycle, mouse_repeat):
             # TODO: Fix up using the 9-DOF sensor once new soldering iron arrives
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
-                if state == GPIO.HIGH:
-                    pointer.state[0] = pin.code
-                else:
-                    pointer.state[0] = 0
+                mouse.button = pin.code if state == GPIO.HIGH else 0
                 pin.state = state
                 pin.transition = now
-                pointer.send_current()
+                mouse.send()
             if (state == GPIO.HIGH) and (pin.transition + mouse_repeat) <= now:
-                pointer.state[0] = 0
-                pointer.send_current()
-                pointer.state[0] = pin.code
-                pointer.send_current()
+                # mouse button up
+                mouse.button = 0
+                mouse.send()
+                # mouse button down
+                mouse.button = pin.code
+                mouse.send()
                 pin.transition = now
+
         time.sleep(cycle)
 
 def main():
