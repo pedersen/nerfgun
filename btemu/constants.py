@@ -182,8 +182,25 @@ codemods = {v: k for k, v in modkeys.items()}
 KEY_DOWN_TIME = 0.01
 KEY_DELAY = 0.01
 
+# DBUS constants
+DBUS_DOTTED_NAME = "org.thanhle.btkbservice"
+DBUS_PATH_NAME = "/org/thanhle/btkbservice"
+
 # bluetooth constants
 
+INPUT_REPORT = 0xA1
+KBD_EVENT = 1
+MOUSE_EVENT = 2
+UUID = "00001124-0000-1000-8000-00805f9b34fb"
+P_CTRL = 17  # Service port - must match port configured in SDP record
+P_INTR = 19  # Interrupt port - must match port configured in SDP record
+DEV_NAME = "Raspberry Pi Custom Controller"
+BUS_NAME = 'org.bluez'
+BUS_NAME_PATH = '/org/bluez'
+PROFILE_MANAGER = "org.bluez.ProfileManager1"
+AGENT_INTERFACE = 'org.bluez.Agent1'
+AGENT_PATH = "/test/agent"
+HCI_DEVICE = "/org/bluez/hci0"
 sdp_record = """
 <?xml version="1.0" encoding="UTF-8" ?>
 
@@ -300,10 +317,3 @@ sdp_record = """
 	</attribute>
 </record>
 """
-
-UUID = "00001124-0000-1000-8000-00805f9b34fb"
-P_CTRL = 17  # Service port - must match port configured in SDP record
-P_INTR = 19  # Interrupt port - must match port configured in SDP record
-DEV_NAME = "Raspberry Pi Custom Controller"
-DBUS_DOTTED_NAME = "org.thanhle.btkbservice"
-DBUS_PATH_NAME = "/org/thanhle/btkbservice"

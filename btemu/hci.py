@@ -4,15 +4,9 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-import logging
 import socket
 import subprocess
 import sys
-
-from btemu.cfg import BtConfig
-
-logging.basicConfig(level=logging.DEBUG)
-
 from optparse import OptionParser
 
 import bluetooth
@@ -22,16 +16,12 @@ import dbus.mainloop.glib
 from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
-
 from . import constants
 from .rootcheck import rootcheck
-
-BUS_NAME = 'org.bluez'
-AGENT_INTERFACE = 'org.bluez.Agent1'
-AGENT_PATH = "/test/agent"
+from .cfg import BtConfig
 
 
-class BTKbDevice:
+class BtHciDevice:
     MY_ADDRESS = bluetooth.read_local_bdaddr()
     MY_DEV_NAME = constants.DEV_NAME
 
@@ -45,11 +35,11 @@ class BTKbDevice:
     # configure the bluetooth hardware device
     @staticmethod
     def init_bt_device():
-        logging.debug("3. Configuring Device name " + BTKbDevice.MY_DEV_NAME)
+        logging.debug("3. Configuring Device name " + BtHciDevice.MY_DEV_NAME)
         # set the device class to a keybord and set the name
         subprocess.run(["hciconfig", "hci0", "up"])
         subprocess.run(["hciconfig", "hci0", "class", "0x0025C0"])
-        subprocess.run(["hciconfig", "hci0", "name", BTKbDevice.MY_DEV_NAME])
+        subprocess.run(["hciconfig", "hci0", "name", BtHciDevice.MY_DEV_NAME])
         # make the device discoverable
         subprocess.run(["hciconfig", "hci0", "piscan"])
 
@@ -64,8 +54,8 @@ class BTKbDevice:
         }
         # retrieve a proxy for the bluez profile interface
         bus = dbus.SystemBus()
-        manager = dbus.Interface(bus.get_object("org.bluez", "/org/bluez"), "org.bluez.ProfileManager1")
-        manager.RegisterProfile("/org/bluez/hci0", constants.UUID, opts)
+        manager = dbus.Interface(bus.get_object(constants.BUS_NAME, constants.BUS_NAME_PATH), constants.PROFILE_MANAGER)
+        manager.RegisterProfile(constants.HCI_DEVICE, constants.UUID, opts)
         logging.debug("6. Profile registered ")
 
     # listen for incoming client connections
@@ -84,59 +74,62 @@ class BTKbDevice:
         self.sinterrupt.listen(5)
 
         self.ccontrol, cinfo = self.scontrol.accept()
-        logging.debug ("\033[0;32mGot a connection on the control channel from %s \033[0m" % cinfo[0])
+        logging.debug("Got a connection on the control channel from %s" % cinfo[0])
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
-        logging.debug ("\033[0;32mGot a connection on the interrupt channel from %s \033[0m" % cinfo[0])
+        logging.debug("Got a connection on the interrupt channel from %s" % cinfo[0])
 
     # send a string to the bluetooth host machine
-    def send_string(self, message):
+    def send(self, message):
         try:
             self.cinterrupt.send(bytes(message))
         except OSError as err:
             logging.error(err)
 
 
-class BTKbService(dbus.service.Object):
+class BtHciService(dbus.service.Object):
     def __init__(self):
-        logging.debug("1. Setting up service")
+        logging.debug("Setting up HCI Service")
         # set up as a dbus service
         bus_name = dbus.service.BusName(constants.DBUS_DOTTED_NAME, bus=dbus.SystemBus())
         dbus.service.Object.__init__(self, bus_name, constants.DBUS_PATH_NAME)
+
         # create and setup our device
-        self.device = BTKbDevice()
+        self.device = BtHciDevice()
+
         # start listening for connections
         self.device.listen()
+        logging.debug("HCI Service ready")
 
     @dbus.service.method(constants.DBUS_DOTTED_NAME, in_signature='yay')
     def send_keys(self, modifier_byte, keys):
         logging.debug("Get send_keys request through dbus")
         logging.debug(f"key msg: {str(keys)}")
-        state = [ 0xA1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ]
-        state[2] = int(modifier_byte)
-        count = 4
-        for key_code in keys:
-            if(count < 10):
-                state[count] = int(key_code)
-            count += 1
-        self.device.send_string(state)
+        message = [ constants.INPUT_REPORT,
+                  constants.KBD_EVENT,
+                  int(modifier_byte),
+                  0,  # Vendor reserved byte
+                  ]
+        message.extend(keys)
+        message.extend([0, 0, 0, 0, 0, 0])  # ensure that 6 bytes are present for possible key presses
+        self.device.send(message[:10])  # keyboard event records are limited to 10 bytes
 
     @dbus.service.method(constants.DBUS_DOTTED_NAME, in_signature='yay')
     def send_mouse(self, modifier_byte, keys):
-        state = [0xA1, 2, 0, 0, 0, 0]
-        count = 2
-        for key_code in keys:
-            if(count < 6):
-                state[count] = int(key_code)
-            count += 1
-        self.device.send_string(state)
+        """
+        modifier_byte is ignored when sending in mouse events
+        """
+        message = [constants.INPUT_REPORT,
+                 constants.MOUSE_EVENT,
+                 ]
+        message.extend(keys)
+        self.device.send(message[:6])  # mouse event records are limited to 6 bytes
 
 
 def main():
     rootcheck()
     parser = OptionParser()
-    parser.add_option("-c", "--conf", dest="filename",
-                      help="path of config file to use", metavar="FILE")
+    parser.add_option("-c", "--conf", dest="filename", help="path of config file to use", metavar="FILE")
     (options, args) = parser.parse_args()
     if not options.filename:
         logging.error("*** Must supply config file parameter!")
@@ -144,9 +137,9 @@ def main():
         sys.exit(2)
     try:
         cfg = BtConfig(options.filename)
-        BTKbDevice.MY_DEV_NAME = cfg.devname
+        BtHciDevice.MY_DEV_NAME = cfg.devname
         DBusGMainLoop(set_as_default=True)
-        myservice = BTKbService()
+        myservice = BtHciService()
         loop = GLib.MainLoop()
         loop.run()
     except KeyboardInterrupt:
