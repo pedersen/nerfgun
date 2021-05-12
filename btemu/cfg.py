@@ -43,4 +43,8 @@ class BtConfig:
 
     @property
     def mouse_repeat(self):
-        return float(self.conf.get('btemu.mouse-repeat'))/1000.0 # number of ms between repeat as part of a second
+        return float(self.conf.get('btemu.mouse-repeat'))/1000.0  # number of ms between repeat as part of a second
+
+    @property
+    def powerpin(self):
+        return int(self.conf.get('btemu.power_down_pin', 26))  # Default pin for power down to be 26
