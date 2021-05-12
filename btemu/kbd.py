@@ -35,6 +35,8 @@ def convert(evdev_keycode):
 
 
 def scancode(key):
+    if key == ' ':
+        key = 'SPACE'
     return constants.keytable[f"KEY_{key.upper()}"]
 
 
@@ -108,7 +110,7 @@ def main():
     for s in args:
         logging.info(f"Sending '{s}'")
         dc.send_string(s)
-        dc.send_string(" ")
+        dc.send_string(constants.keytable.KEY_SPACE)
         logging.info("Done.")
 
 

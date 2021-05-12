@@ -46,7 +46,7 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
         for pin in modpins:
             state = GPIO.input(pin.pinnum)
             if state == GPIO.HIGH:
-                keycode = constants.codemods[pin.code]
+                keycode = constants.modkeys(pin.code)
                 keyboard.state[2][pin.code] = 1
                 downkeys.append(constants.keytable[keycode])
             else:

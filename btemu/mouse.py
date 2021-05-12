@@ -6,6 +6,7 @@ import dbus
 from optparse import OptionParser
 
 from .rootcheck import rootcheck
+from . import constants
 
 
 class InvalidMouseButton(Exception):
