@@ -185,6 +185,8 @@ KEY_DELAY = 0.01
 # DBUS constants
 DBUS_DOTTED_NAME = "org.thanhle.btkbservice"
 DBUS_PATH_NAME = "/org/thanhle/btkbservice"
+DBUS_OBJECT_MANAGER = "org.freedesktop.DBus.ObjectManager"
+DBUS_PROPERTIES = "org.freedesktop.DBus.Properties"
 
 # bluetooth constants
 
@@ -197,8 +199,11 @@ P_INTR = 19  # Interrupt port - must match port configured in SDP record
 DEV_NAME = "Raspberry Pi Custom Controller"
 BUS_NAME = 'org.bluez'
 BUS_NAME_PATH = '/org/bluez'
-PROFILE_MANAGER = "org.bluez.ProfileManager1"
-AGENT_INTERFACE = 'org.bluez.Agent1'
+ADAPTER_INTERFACE = f"{BUS_NAME}.Adapter1"
+DEVICE_INTERFACE = f"{BUS_NAME}.Device1"
+PROFILE_MANAGER = f"{BUS_NAME}.ProfileManager1"
+AGENT_INTERFACE = f'{BUS_NAME}.Agent1'
+AGENT_MANAGER = f"{BUS_NAME}.AgentManager1"
 AGENT_PATH = "/test/agent"
 HCI_DEVICE = "/org/bluez/hci0"
 sdp_record = """

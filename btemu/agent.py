@@ -8,14 +8,8 @@ import dbus.service
 import dbus.mainloop.glib
 from gi.repository import GObject
 
+from . import constants
 from .rootcheck import rootcheck
-
-SERVICE_NAME = "org.bluez"
-ADAPTER_INTERFACE = SERVICE_NAME + ".Adapter1"
-DEVICE_INTERFACE = SERVICE_NAME + ".Device1"
-BUS_NAME = 'org.bluez'
-AGENT_INTERFACE = 'org.bluez.Agent1'
-AGENT_PATH = "/test/agent"
 
 bus = None
 device_obj = None
@@ -25,7 +19,7 @@ mainloop = None
 
 def get_managed_objects():
     bus = dbus.SystemBus()
-    manager = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager")
+    manager = dbus.Interface(bus.get_object(constants.BUS_NAME, "/"), constants.DBUS_OBJECT_MANAGER)
     return manager.GetManagedObjects()
 
 
@@ -36,13 +30,13 @@ def find_adapter(pattern=None):
 def find_adapter_in_objects(objects, pattern=None):
     bus = dbus.SystemBus()
     for path, ifaces in objects.iteritems():
-        adapter = ifaces.get(ADAPTER_INTERFACE)
+        adapter = ifaces.get(constants.ADAPTER_INTERFACE)
         if adapter is None:
             continue
         if not pattern or pattern == adapter["Address"] or \
                 path.endswith(pattern):
-            obj = bus.get_object(SERVICE_NAME, path)
-            return dbus.Interface(obj, ADAPTER_INTERFACE)
+            obj = bus.get_object(constants.BUS_NAME, path)
+            return dbus.Interface(obj, constants.ADAPTER_INTERFACE)
     raise Exception("Bluetooth adapter not found")
 
 
@@ -57,24 +51,24 @@ def find_device_in_objects(objects, device_address, adapter_pattern=None):
         adapter = find_adapter_in_objects(objects, adapter_pattern)
         path_prefix = adapter.object_path
     for path, ifaces in objects.iteritems():
-        device = ifaces.get(DEVICE_INTERFACE)
+        device = ifaces.get(constants.DEVICE_INTERFACE)
         if device is None:
             continue
         if (device["Address"] == device_address and
                 path.startswith(path_prefix)):
-            obj = bus.get_object(SERVICE_NAME, path)
-            return dbus.Interface(obj, DEVICE_INTERFACE)
+            obj = bus.get_object(constants.BUS_NAME, path)
+            return dbus.Interface(obj, constants.DEVICE_INTERFACE)
 
     raise Exception("Bluetooth device not found")
 
 
 def set_trusted(path):
-    props = dbus.Interface(bus.get_object("org.bluez", path), "org.freedesktop.DBus.Properties")
-    props.Set("org.bluez.Device1", "Trusted", True)
+    props = dbus.Interface(bus.get_object(constants.BUS_NAME, path), constants.DBUS_PROPERTIES)
+    props.Set(constants.DEVICE_INTERFACE, "Trusted", True)
 
 
 def dev_connect(path):
-    dev = dbus.Interface(bus.get_object("org.bluez", path), "org.bluez.Device1")
+    dev = dbus.Interface(bus.get_object(constants.BUS_NAME, path), constants.DEVICE_INTERFACE)
     dev.Connect()
 
 
@@ -88,44 +82,44 @@ class Agent(dbus.service.Object):
     def set_exit_on_release(self, exit_on_release):
         self.exit_on_release = exit_on_release
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="", out_signature="")
     def Release(self):
         logging.debug("Release")
         if self.exit_on_release:
             mainloop.quit()
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="os", out_signature="")
     def AuthorizeService(self, device, uuid):
         return
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="s")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="s")
     def RequestPinCode(self, device):
         logging.debug("RequestPinCode (%s)" % (device))
         set_trusted(device)
         return "0000"
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="u")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="u")
     def RequestPasskey(self, device):
         set_trusted(device)
         return dbus.UInt32("000000")
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="ouq", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="ouq", out_signature="")
     def DisplayPasskey(self, device, passkey, entered):
         logging.debug(f"DisplayPasskey ({device}, {passkey:06} entered {entered:06})")
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="os", out_signature="")
     def DisplayPinCode(self, device, pincode):
         logging.debug(f"DisplayPinCode ({device}, {pincode})")
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="ou", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="ou", out_signature="")
     def RequestConfirmation(self, device, passkey):
         set_trusted(device)
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="")
     def RequestAuthorization(self, device):
         logging.debug(f"RequestAuthorization ({device})")
 
-    @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
+    @dbus.service.method(constants.AGENT_INTERFACE, in_signature="", out_signature="")
     def Cancel(self):
         logging.debug("Cancel")
 
@@ -171,13 +165,13 @@ def main():
     if options.capability:
         capability = options.capability
 
-    path = "/test/agent"
+    path = constants.AGENT_PATH
     agent = Agent(bus, path)
 
     mainloop = GObject.MainLoop()
 
-    obj = bus.get_object(BUS_NAME, "/org/bluez")
-    manager = dbus.Interface(obj, "org.bluez.AgentManager1")
+    obj = bus.get_object(constants.BUS_NAME, constants.BUS_NAME_PATH)
+    manager = dbus.Interface(obj, constants.AGENT_MANAGER)
     manager.RegisterAgent(path, capability)
 
     logging.debug("Agent registered")
