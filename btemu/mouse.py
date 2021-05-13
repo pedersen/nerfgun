@@ -1,4 +1,6 @@
 import logging
+import time
+
 logging.basicConfig(level=logging.DEBUG)
 
 import sys
@@ -59,14 +61,25 @@ class MouseClient:
     def button_up(self):
         self.button = 0
 
+    def button_click(self, buttonnum):
+        self.button_down(buttonnum)
+        self.send()
+        time.sleep(constants.KEY_DELAY)
+        self.button_up()
+        self.send()
+
+    @staticmethod
+    def check_range(name, value):
+        if value < -128 or value > 127:
+            raise InvalidMouseMovement(f"{name} {value} not in range [-128:127]")
+
     @property
     def dx(self):
         return self._dx
 
     @dx.setter
     def dx(self, dx):
-        if dx < -128 or dx > 127:
-            raise InvalidMouseMovement(f"dx {dx} not in range [-128:127]")
+        self.check_range("dx", dx)
         self._dx = dx
 
     @property
@@ -75,8 +88,7 @@ class MouseClient:
 
     @dy.setter
     def dy(self, dy):
-        if dy < -128 or dy > 127:
-            raise InvalidMouseMovement(f"dy {dy} not in range [-128:127]")
+        self.check_range("dy", dy)
         self._dy = dy
 
     @property
@@ -85,8 +97,7 @@ class MouseClient:
 
     @dz.setter
     def dz(self, dz):
-        if dz < -128 or dz > 127:
-            raise InvalidMouseMovement(f"dz {dz} not in range [-128:127]")
+        self.check_range("dz", dz)
         self._dz = dz
 
 
