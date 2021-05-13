@@ -23,15 +23,8 @@ from . import constants
 from .rootcheck import rootcheck
 
 
-class InvalidKeyCode(Exception):
+class TooManyKeys(Exception):
     pass
-
-
-def convert(evdev_keycode):
-    try:
-        return constants.keytable[evdev_keycode]
-    except KeyError:
-        raise InvalidKeyCode(evdev_keycode)
 
 
 def scancode(key):
@@ -40,60 +33,53 @@ def scancode(key):
     return constants.keytable[f"KEY_{key.upper()}"]
 
 
-def modkey(evdev_keycode):
-    return constants.modkeys.get(evdev_keycode, -1)
-
-
 class KeyboardClient:
     def __init__(self):
         # the structure for a bt keyboard input report (size is 10 bytes)
-        self.state = [
-            0xA1,  # this is an input report
-            0x01,  # Usage report = KeyboardClient
-            # Bit array for Modifier keys
-            [0,  # Right GUI - Windows Key
-             0,  # Right ALT
-             0,  # Right Shift
-             0,  # Right Control
-             0,  # Left GUI
-             0,  # Left ALT
-             0,  # Left Shift
-             0],  # Left Control
-            0x00,  # Vendor reserved
-            0x00,  # rest is space for 6 keys
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00]
+        self.modkeys = 0b00000000
+        self.keys = []
         self.bus = dbus.SystemBus()
         self.btkservice = self.bus.get_object(constants.DBUS_DOTTED_NAME, constants.DBUS_PATH_NAME)
         self.iface = dbus.Interface(self.btkservice, constants.DBUS_DOTTED_NAME)
 
+    def mod_key_down(self, modkey):
+        key = constants.modkeys[f"KEY_{modkey}"]
+        self.modkeys |= key
+
+    def mod_key_up(self, modkey):
+        key = constants.modkeys[f"KEY_{modkey}"]
+        self.modkeys &= ~key
+
+    def key_down(self, key):
+        if len(self.keys) == 6:  # maximum number of keys bluetooth accepts
+            raise TooManyKeys("Keyboard buffer overflow")
+        self.keys.append(scancode(key))
+
+    def key_up(self, key):
+        key = scancode(key)
+        if key in self.keys:
+            self.keys.remove(key)
+
     def send_key_state(self):
         """sends a single frame of the current key state to the emulator server"""
-        modkeys = 0b00000000
-        element = self.state[2]
-        for shl, bit in enumerate(element):
-            modkeys |= (bit << (7-shl))
-        self.iface.send_keys(modkeys, self.state[4:10])
+        self.iface.send_keys(self.modkeys, bytes(self.keys))
 
-    def send_key_down(self, scancode):
+    def send_key_down(self, key):
         """sends a key down event to the server"""
-        self.state[4] = scancode
+        self.key_down(key)
         self.send_key_state()
 
-    def send_key_up(self):
+    def send_key_up(self, key):
         """sends a key up event to the server"""
-        self.state[4] = 0
+        self.key_up(key)
         self.send_key_state()
 
     def send_string(self, string_to_send):
         string_to_send = string_to_send.upper()
         for c in string_to_send:
-            self.send_key_down(scancode(c))
+            self.send_key_down(c)
             time.sleep(constants.KEY_DOWN_TIME)
-            self.send_key_up()
+            self.send_key_up(c)
             time.sleep(constants.KEY_DELAY)
 
 
@@ -110,7 +96,7 @@ def main():
     for s in args:
         logging.info(f"Sending '{s}'")
         dc.send_string(s)
-        dc.send_string(constants.keytable.KEY_SPACE)
+        dc.send_string(" ")
         logging.info("Done.")
 
 

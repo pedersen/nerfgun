@@ -12,11 +12,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 import os
 import socket
-import subprocess
 import sys
 from optparse import OptionParser
 
-import bluetooth
 import dbus
 import dbus.service
 import dbus.mainloop.glib
@@ -37,22 +35,22 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
 
     @dbus.service.method(constants.PROFILE, in_signature='', out_signature='')
     def Release(self):
-        print('Release')
+        logging.info('Release')
         loop.quit()
 
     @dbus.service.method(constants.PROFILE, in_signature='oha{sv}', out_signature='')
     def NewConnection(self, path, fd, properties):
         self.fd = fd.take()
-        print('NewConnection({}, {})'.format(path, self.fd))
+        logging.info(f'NewConnection({path}, {self.fd})')
         for key in properties.keys():
             if key == 'Version' or key == 'Features':
-                print('  {} = 0x{:04x}'.format(key, properties[key]))
+                logging.info(f'  {key} = 0x{properties[key]:04x}')
             else:
-                print('  {} = {}'.format(key, properties[key]))
+                logging.info(f'  {key} = {properties[key]}')
 
     @dbus.service.method(constants.PROFILE, in_signature='o', out_signature='')
     def RequestDisconnection(self, path):
-        print('RequestDisconnection {}'.format(path))
+        logging.info(f'RequestDisconnection {path}')
 
         if self.fd > 0:
             os.close(self.fd)
@@ -75,7 +73,7 @@ class BTKbDevice:
         self.ccontrol = None  # Socket object for control
         self.sinterrupt = None
         self.cinterrupt = None  # Socket object for interrupt
-        self.dev_path = '/org/bluez/hci{}'.format(hci)
+        self.dev_path = f'{constants.BUS_NAME_PATH}/hci{hci}'
         self.dev_name = dev_name
         self.P_INTR = p_intr
         self.P_CTRL = p_ctrl
@@ -111,7 +109,7 @@ class BTKbDevice:
                     self.on_disconnect()
 
     def on_disconnect(self):
-        print('The client has been disconnected')
+        logging.info('The client has been disconnected')
         self.listen()
 
     @property
@@ -185,7 +183,7 @@ class BTKbDevice:
         Listen for connections coming from HID client
         """
 
-        print('Waiting for connections')
+        logging.info('Waiting for connections')
         self.scontrol = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_SEQPACKET, socket.BTPROTO_L2CAP)
         self.scontrol.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sinterrupt = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_SEQPACKET, socket.BTPROTO_L2CAP)
@@ -201,7 +199,7 @@ class BTKbDevice:
         logging.info(f'{cinfo[0]} connected on the control socket')
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
-        print(f'{cinfo[0]} connected on the interrupt channel')
+        logging.info(f'{cinfo[0]} connected on the interrupt channel')
 
     def send(self, msg):
         """
@@ -272,4 +270,3 @@ def main():
 # main routine
 if __name__ == "__main__":
     main()
-#
