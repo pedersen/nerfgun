@@ -19,6 +19,10 @@ class InvalidMouseMovement(Exception):
     pass
 
 
+def twos_complement_byte(num):
+    return int.from_bytes(int.to_bytes(num, 1, byteorder='big', signed=True), byteorder='big')
+
+
 class MouseClient:
     """
     This class is responsible for generating DBUS mouse events. It takes instructions from outside, including when
@@ -72,6 +76,7 @@ class MouseClient:
     def check_range(name, value):
         if value < -128 or value > 127:
             raise InvalidMouseMovement(f"{name} {value} not in range [-128:127]")
+        return int.from_bytes(int.to_bytes(value, 1, byteorder='big', signed=True), byteorder='big')
 
     @property
     def dx(self):
@@ -79,8 +84,7 @@ class MouseClient:
 
     @dx.setter
     def dx(self, dx):
-        self.check_range("dx", dx)
-        self._dx = dx
+        self._dx = self.check_range("dx", dx)
 
     @property
     def dy(self):
@@ -88,8 +92,7 @@ class MouseClient:
 
     @dy.setter
     def dy(self, dy):
-        self.check_range("dy", dy)
-        self._dy = dy
+        self._dy = self.check_range("dy", dy)
 
     @property
     def dz(self):
@@ -97,8 +100,7 @@ class MouseClient:
 
     @dz.setter
     def dz(self, dz):
-        self.check_range("dz", dz)
-        self._dz = dz
+        self._dz = self.check_range("dz", dz)
 
 
 def main():
