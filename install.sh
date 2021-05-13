@@ -41,7 +41,6 @@ sudo python setup.py install
 
 sudo cp btemu/btemu.conf /etc/btemu.conf
 sudo cp sysconfigs/btemu-power.service /lib/systemd/system/btemu-power.service
-sudo cp sysconfigs/btemu-agent.service /lib/systemd/system/btemu-agent.service
 sudo cp sysconfigs/btemu-hci.service /lib/systemd/system/btemu-hci.service
 sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
 sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service
@@ -50,8 +49,6 @@ sudo systemctl enable btemu-power
 sudo systemctl restart btemu-power
 sudo systemctl daemon-reload
 sudo systemctl restart bluetooth
-sudo systemctl enable btemu-agent
-sudo systemctl restart btemu-agent
 sudo systemctl enable btemu-hci
 sudo systemctl restart btemu-hci
 

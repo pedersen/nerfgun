@@ -169,14 +169,14 @@ class keytable(IntEnum):
 # Map modifier keys to array element in the bit array
 @unique
 class modkeys(IntFlag):
-    KEY_RIGHTMETA = 1
-    KEY_RIGHTALT = 2
-    KEY_RIGHTSHIFT = 3
-    KEY_RIGHTCTRL = 4
-    KEY_LEFTMETA = 5
-    KEY_LEFTALT = 6
-    KEY_LEFTSHIFT = 7
-    KEY_LEFTCTRL = 8
+    KEY_RIGHTMETA  = 0x01
+    KEY_RIGHTALT   = 0x02
+    KEY_RIGHTSHIFT = 0x04
+    KEY_RIGHTCTRL  = 0x08
+    KEY_LEFTMETA   = 0x10
+    KEY_LEFTALT    = 0x20
+    KEY_LEFTSHIFT  = 0x40
+    KEY_LEFTCTRL   = 0x80
 
 KEY_DOWN_TIME = 0.01
 KEY_DELAY = 0.01
@@ -184,6 +184,7 @@ KEY_DELAY = 0.01
 # DBUS constants
 DBUS_DOTTED_NAME = "org.thanhle.btkbservice"
 DBUS_PATH_NAME = "/org/thanhle/btkbservice"
+DBUS_PROFILE_PATH = "/bluez/thanhle/btkb_profile"
 DBUS_OBJECT_MANAGER = "org.freedesktop.DBus.ObjectManager"
 DBUS_PROPERTIES = "org.freedesktop.DBus.Properties"
 
@@ -192,6 +193,8 @@ DBUS_PROPERTIES = "org.freedesktop.DBus.Properties"
 INPUT_REPORT = 0xA1
 KBD_EVENT = 1
 MOUSE_EVENT = 2
+# UUID for HID service (1124)
+# https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
 UUID = "00001124-0000-1000-8000-00805f9b34fb"
 P_CTRL = 17  # Service port - must match port configured in SDP record
 P_INTR = 19  # Interrupt port - must match port configured in SDP record
@@ -200,6 +203,7 @@ BUS_NAME = 'org.bluez'
 BUS_NAME_PATH = '/org/bluez'
 ADAPTER_INTERFACE = f"{BUS_NAME}.Adapter1"
 DEVICE_INTERFACE = f"{BUS_NAME}.Device1"
+PROFILE = f"{BUS_NAME}.Profile1"
 PROFILE_MANAGER = f"{BUS_NAME}.ProfileManager1"
 AGENT_INTERFACE = f'{BUS_NAME}.Agent1'
 AGENT_MANAGER = f"{BUS_NAME}.AgentManager1"

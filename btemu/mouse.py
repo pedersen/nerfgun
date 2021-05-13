@@ -39,7 +39,7 @@ class MouseClient:
 
     def send(self):
         try:
-            self.iface.send_mouse(0, self.state)
+            self.iface.send_mouse(self.state)
         except OSError as err:
             logging.error(err)
 
