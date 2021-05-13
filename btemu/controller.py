@@ -90,6 +90,7 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
 
         time.sleep(cycle)
 
+
 def main():
     rootcheck()
     parser = OptionParser()

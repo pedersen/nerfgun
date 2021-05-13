@@ -93,11 +93,10 @@ def main():
         sys.exit(2)
 
     dc = KeyboardClient()
-    for s in args:
-        logging.info(f"Sending '{s}'")
-        dc.send_string(s)
-        dc.send_string(" ")
-        logging.info("Done.")
+    s = " ".join(args)
+    logging.info(f"Sending '{s}'")
+    dc.send_string(s)
+    logging.info("Done.")
 
 
 if __name__ == "__main__":
