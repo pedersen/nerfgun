@@ -73,7 +73,7 @@ class MouseClient:
         self.send()
 
     @staticmethod
-    def check_range(name, value):
+    def fix_range_delta(name, value):
         if value < -128 or value > 127:
             raise InvalidMouseMovement(f"{name} {value} not in range [-128:127]")
         return int.from_bytes(int.to_bytes(value, 1, byteorder='big', signed=True), byteorder='big')
@@ -84,7 +84,7 @@ class MouseClient:
 
     @dx.setter
     def dx(self, dx):
-        self._dx = self.check_range("dx", dx)
+        self._dx = self.fix_range_delta("dx", dx)
 
     @property
     def dy(self):
@@ -92,7 +92,7 @@ class MouseClient:
 
     @dy.setter
     def dy(self, dy):
-        self._dy = self.check_range("dy", dy)
+        self._dy = self.fix_range_delta("dy", dy)
 
     @property
     def dz(self):
@@ -100,7 +100,7 @@ class MouseClient:
 
     @dz.setter
     def dz(self, dz):
-        self._dz = self.check_range("dz", dz)
+        self._dz = self.fix_range_delta("dz", dz)
 
 
 def main():
