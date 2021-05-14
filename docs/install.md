@@ -17,45 +17,28 @@ keywords:
 
 # Installation Steps
 
-## Initial Steps
+## Software Preparation
 
-* Start by getting Raspbian Lite installed and accessible.
-* Perform any updates you need to before actually digging into the rest of this guide.
-
-## Install 9-DOF Sensor
-
-* Using `sudo raspi-config` make sure the raspberry pi serial port is enabled, but
-  the login shell on the serial port is *disabled*.
-* [This guide](https://www.digikey.com/htmldatasheets/production/1833950/0/0/1/bno055-with-raspberry-pi-beaglebone-black.html)
-  was extremely helpful, though it did have some inaccuracies three years later. In
-  particular, you will need to take the following steps before actually beginning to
-  work on the software:
-  ```python
-  sudo apt install -y python3-dev python3-smbus python3-pip python3-rpi.gpio
-  sudo update-alternatives --install $(which python) python $(which $(readlink $(which python2))) 1
-  sudo update-alternatives --install $(which python) python $(which $(readlink $(which python3))) 2
-  sudo update-alternatives --config python
-  ```
-  Make sure to choose Python3 as your default version of Python. From there, you can
-  follow the guide as presented, and get to the point where you can manipulate the
-  animal statues in your web browser.
-* You now have the 9-DOF sensor installed, working, and ready to go.
-
-## Configure As Bluetooth Keyboard and Mouse
-
-Now, we need to get packages installed to enable the ZeroWH to be a bluetooth keyboard
-and mouse. I'm reusing [code and configuration](https://thanhle.me/emulate-bluetooth-mouse-with-raspberry-pi/)
-to accomplish this. Here's the steps to get the packages and configs in place:
-
-```shell
-sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev
-sudo apt install -y python3-dbus python3-pyudev \
-    python3-evdev python3-gi
-sudo pip install pybluez
-
-sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
-sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service
-sudo systemctl daemon-reload
-sudo systemctl restart bluetooth
-```
-
+* Start by getting Raspbian Lite installed and accessible on an SD card of at least 8GB.
+  Use the [Raspberry Pi Imager](https://www.raspberrypi.org/software/) to do so.
+* On the newly created boot partition, take the following steps:
+  1. Create an empty file named `ssh`.
+  2. Create a file named `wpa_supplicant.conf` with the following contents:
+      ```
+      ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+      country=US
+      network={
+        ssid="WFiNetworkName"
+        psk="WiFiPassword"
+      }
+      ```
+      Modify the country code to match your country.
+  3. Put [the install script](https://raw.githubusercontent.com/pedersen/nerfgun/main/install.sh)
+     into here as well.
+* If you are on Windows, install [Bonjour Print Services](https://support.apple.com/kb/dl999?locale=en_US).
+* If you are on Linux, install [Avahi Daemon](http://avahi.org/). On Debian/Ubuntu and derivatives,
+  `sudo apt install -y avahi-daemon avahi-dnsconfd avahi-utils`.
+* Install the SD card into the Raspberry Pi and boot it up.
+* Once it is installed, ssh into `pi@raspberrypi.local`. On Windows, use
+  [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) to do so.
+* Run `bash /boot/install.sh`. Wait about 40 minutes, and everything will be ready.

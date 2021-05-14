@@ -45,18 +45,10 @@ Those are genuine functionality issues to address, and I think I have a decent s
   
 The ultimate plan here is to have a device where I've taken a [Nerf Fortnite AR-L](https://nerf.hasbro.com/en-us/product/fortnite-ar-l-nerf-elite-dart-blaster:BD9E4C78-1160-4FD6-9498-A39AC0632525)
 and turned it into something that looks good, and plays comfortably. Getting there will
-take some explanation. See [the installation](docs/install.md). Alternately, you can:
-
-# Run The Install Script
-
-```shell
-wget https://raw.githubusercontent.com/pedersen/nerfgun/main/install.sh
-bash install.sh
-```
+take some explanation. See [the installation](docs/install.md).
 
 # Todo Items
 
-* Include notes on how to configure for initial boot to make the install script easier to get at
 * Enable proper pairing for bluetooth, including pin code verification
 * Have the controller reconnect when it's ready to begin use
 * Turn on and start using the pioled display
