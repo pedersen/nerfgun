@@ -5,7 +5,7 @@ from setuptools.command.install import install
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
-        install.run(self)
+        super().do_egg_install()
         import btemu.install
         btemu.install.main()
 
