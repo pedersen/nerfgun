@@ -39,19 +39,6 @@ test -d nerfgun || git clone https://github.com/pedersen/nerfgun.git
 cd nerfgun
 sudo python setup.py install
 
-sudo cp btemu/btemu.conf /etc/btemu.conf
-sudo cp sysconfigs/btemu-power.service /lib/systemd/system/btemu-power.service
-sudo cp sysconfigs/btemu-hci.service /lib/systemd/system/btemu-hci.service
-sudo cp sysconfigs/org.thanhle.btkbservice.conf /etc/dbus-1/system.d
-sudo cp sysconfigs/bluetooth.service /lib/systemd/system/bluetooth.service
-
-sudo systemctl enable btemu-power
-sudo systemctl restart btemu-power
-sudo systemctl daemon-reload
-sudo systemctl restart bluetooth
-sudo systemctl enable btemu-hci
-sudo systemctl restart btemu-hci
-
 sudo raspi-config nonint do_change_locale en_US.UTF-8
 sudo raspi-config nonint do_change_timezone US/Eastern
 sudo raspi-config nonint do_configure_keyboard us

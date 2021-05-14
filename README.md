@@ -54,9 +54,6 @@ take some explanation. See [the installation](docs/install.md).
 * Turn on and start using the pioled display
 * Get extra AdaFruit packages included properly so that we know they work without extra install steps
 * Modify setup.py to produce an actual installable package
-* Reduce the install script as much as possible (lots of extras in there)
-* Include btemu.conf in the manifest for the package
-* Create an installation tool that bundles all the sysconfigs, and ensures they get installed
 * Create a GUI for managing the btemu.cfg file
 * Enable "firmware updates" which will install a new version of the package
 * Add potentiometers and ADCs to enable variable repeat speed for mouse clicks, walk speed

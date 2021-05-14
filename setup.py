@@ -1,15 +1,14 @@
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 
-install_requirements = [
-    'Adafruit-GPIO>=0.9.3',
-    'dbus-python',
-    'pybluez',
-    'pygobject',
-    'pyhocon',
-    'pyserial',
-    'evdev',
-    'pyudev',
-]
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        import btemu.install
+        btemu.install.main()
+
 
 setup(
     name='btemu',
@@ -25,15 +24,27 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=install_requirements,
+    install_requires=[
+        'Adafruit-GPIO>=0.9.3',
+        'dbus-python',
+        'pybluez',
+        'pygobject',
+        'pyhocon',
+        'pyserial',
+        'evdev',
+        'pyudev',
+    ],
     entry_points={
         'console_scripts': [
             'btemu-serve = btemu.hci:main',
-            'btemu-agent = btemu.agent:main',
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
             'btemu-power = btemu.power:main',
             'btemu-controller = btemu.controller:main',
+            'btemu-setup = btemu.install:main',
         ],
+    },
+    cmdclass={
+        'install': PostInstallCommand,
     },
 )
