@@ -20,7 +20,7 @@ setup(
     author='Michael J. Pedersen',
     author_email='datacyclist@gmail.com',
     url='https://github.com/pedersen/nerfgun',
-    license='MIT and GPL',
+    license='MIT',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,

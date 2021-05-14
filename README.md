@@ -52,7 +52,6 @@ take some explanation. See [the installation](docs/install.md).
 * Enable proper pairing for bluetooth, including pin code verification
 * Have the controller reconnect when it's ready to begin use
 * Turn on and start using the pioled display
-* Get extra AdaFruit packages included properly so that we know they work without extra install steps
 * Modify setup.py to produce an actual installable package
 * Create a GUI for managing the btemu.cfg file
 * Enable "firmware updates" which will install a new version of the package

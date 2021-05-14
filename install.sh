@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -x
 set -e
 
@@ -23,16 +22,6 @@ sudo apt install -y python3-dbus python3-pyudev python3-evdev python3-gi python3
 sudo apt install -y libcairo2-dev
 sudo pip3 install pybluez
 sudo apt clean
-
-cd ${HOME}
-test -d Adafruit_Python_BNO055 || git clone https://github.com/adafruit/Adafruit_Python_BNO055.git
-cd Adafruit_Python_BNO055
-sudo python setup.py install
-
-cd ${HOME}
-test -d Adafruit_Python_SSD1306 || git clone https://github.com/adafruit/Adafruit_Python_SSD1306.git
-cd Adafruit_Python_SSD1306
-sudo python setup.py install
 
 cd ${HOME}
 test -d nerfgun || git clone https://github.com/pedersen/nerfgun.git
