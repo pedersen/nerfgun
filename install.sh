@@ -27,8 +27,8 @@ test -d nerfgun || git clone https://github.com/pedersen/nerfgun.git
 cd nerfgun
 sudo python setup.py install
 
-sudo raspi-config nonint do_change_locale en_US.UTF-8
 sudo raspi-config nonint do_change_timezone US/Eastern
 sudo raspi-config nonint do_configure_keyboard us
+sudo raspi-config nonint do_change_locale en_US.UTF-8
 sudo raspi-config nonint do_hostname nerfgun
 sudo shutdown -r now
