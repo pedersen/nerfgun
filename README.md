@@ -56,14 +56,14 @@ bash install.sh
 
 # Todo Items
 
+* Include notes on how to configure for initial boot to make the install script easier to get at
+* Enable proper pairing for bluetooth, including pin code verification
+* Have the controller reconnect when it's ready to begin use
 * Turn on and start using the pioled display
+* Get extra AdaFruit packages included properly so that we know they work without extra install steps
+* Modify setup.py to produce an actual installable package
+* Reduce the install script as much as possible (lots of extras in there)
+* Include btemu.conf in the manifest for the package
+* Create an installation tool that bundles all the sysconfigs, and ensures they get installed
 * Create a GUI for managing the btemu.cfg file
 * Enable "firmware updates" which will install a new version of the package
-* Have the controller reconnect when it's ready to begin use
-* Enable proper pairing for bluetooth, including pin code verification
-* Create an installation tool that bundles all the sysconfigs, and ensures they get installed
-* Modify setup.py to produce an actual installable package
-* Get extra AdaFruit packages included properly so that we know they work without extra install steps
-* Reduce the install script as much as possible (lots of extras in there)
-* Include notes on how to configure for initial boot to make the install script easier to get at
-* Include btemu.conf in the manifest for the package
