@@ -67,3 +67,9 @@ bash install.sh
 * Create an installation tool that bundles all the sysconfigs, and ensures they get installed
 * Create a GUI for managing the btemu.cfg file
 * Enable "firmware updates" which will install a new version of the package
+* Add potentiometers and ADCs to enable variable repeat speed for mouse clicks, walk speed
+  (in keyboard mode)
+* Add "Mouse Lock" key, which prevents the motion sensor from being used while it's depressed
+  (useful for games which simulate such motion, or when needing to turn around 360, etc)
+* Add controller mode which will allow to be connected as xbox/ps5/etc controller instead of
+  keyboard/mouse
