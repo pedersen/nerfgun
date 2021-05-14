@@ -19,16 +19,15 @@ class PinState:
     pinnum: int
     state: int
     transition: float
-    code: int
     key: str
 
 
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
     now = time.time()
 
-    keypins = [PinState(x, GPIO.LOW, now, keycfgs[x], x) for x in keycfgs.keys()]
-    modpins = [PinState(x, GPIO.LOW, now, modcfgs[x], x) for x in modcfgs.keys()]
-    mousepins = [PinState(x, GPIO.LOW, now, mouse[x], x) for x in mouse.keys()]
+    keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
+    modpins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in modcfgs.items()]
+    mousepins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in mouse.items()]
 
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
@@ -42,15 +41,14 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
     logging.info("Polling mouse and keyboard events")
     while True:
         now = time.time()
-        downkeys = []
         for pin in modpins:
             state = GPIO.input(pin.pinnum)
             if state == GPIO.HIGH:
-                keycode = constants.modkeys(pin.code)
-                keyboard.state[2][pin.code] = 1
-                downkeys.append(constants.keytable[keycode])
+                keyboard.mod_key_down(pin.key)
+                keyboard.key_down(pin.key)
             else:
-                keyboard.state[2][pin.code] = 0
+                keyboard.mod_key_up(pin.key)
+                keyboard.key_up(pin.key)
             if state != pin.state:
                 pin.state = state
                 pin.transition = now
@@ -59,15 +57,11 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
                 if state == GPIO.HIGH:
-                    downkeys.append(pin.code)
+                    keyboard.key_down(pin.key)
                 else:
-                    keyboard.send_key_up()
+                    keyboard.key_up(pin.key)
                 pin.state = state
                 pin.transition = now
-
-        downkeys.extend([0, 0, 0, 0, 0, 0])
-        for idx in range(0, 6):
-            keyboard.state[4+idx] = downkeys[idx]
 
         keyboard.send_key_state()
 
@@ -75,16 +69,20 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
             # TODO: Fix up using the 9-DOF sensor once new soldering iron arrives
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
-                mouse.button = pin.code if state == GPIO.HIGH else 0
+                if state == GPIO.HIGH:
+                    mouse.button_down(int(pin.key))
+                else:
+                    mouse.button_up()
                 pin.state = state
                 pin.transition = now
                 mouse.send()
             if (state == GPIO.HIGH) and (pin.transition + mouse_repeat) <= now:
                 # mouse button up
-                mouse.button = 0
+                mouse.button_up()
                 mouse.send()
                 # mouse button down
-                mouse.button = pin.code
+                time.sleep(constants.KEY_DELAY)
+                mouse.button_down(int(pin.key))
                 mouse.send()
                 pin.transition = now
 

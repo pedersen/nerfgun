@@ -20,12 +20,18 @@ class BtConfig:
         for key in tree:
             pin = int(key.replace('pin_', ''))
             key = tree.get(key).upper()
-            code = keytable.get(f'KEY_{key}', None)
+            try:
+                code = keytable[f'KEY_{key}']
+            except KeyError:
+                code = None
             if code is not None:
-                keytbl[pin] = code
-            code = modkeys.get(f'KEY_{key}', None)
+                keytbl[pin] = key
+            try:
+                code = modkeys[f'KEY_{key}']
+            except KeyError:
+                code = None
             if code is not None:
-                modtbl[pin] = code
+                modtbl[pin] = key
         return keytbl, modtbl
 
     @property

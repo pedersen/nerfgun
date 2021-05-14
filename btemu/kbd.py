@@ -30,7 +30,10 @@ class TooManyKeys(Exception):
 def scancode(key):
     if key == ' ':
         key = 'SPACE'
-    return constants.keytable[f"KEY_{key.upper()}"]
+    try:
+        return constants.keytable[f"KEY_{key.upper()}"]
+    except AttributeError:
+        return key
 
 
 class KeyboardClient:
@@ -63,6 +66,8 @@ class KeyboardClient:
     def send_key_state(self):
         """sends a single frame of the current key state to the emulator server"""
         self.iface.send_keys(self.modkeys, bytes(self.keys))
+        self.keys = []
+        self.modkeys = 0b00000000
 
     def send_key_down(self, key):
         """sends a key down event to the server"""
