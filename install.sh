@@ -18,9 +18,8 @@ sudo update-alternatives --install $(which python) python $(which $(readlink $(w
 sudo update-alternatives --auto python
 
 sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev
-sudo apt install -y python3-dbus python3-pyudev python3-evdev python3-gi python3-pil
+sudo apt install -y python3-dbus python3-pyudev python3-evdev python3-gi python3-pil python3-bluez
 sudo apt install -y libcairo2-dev
-sudo pip3 install pybluez
 sudo apt clean
 
 cd ${HOME}
