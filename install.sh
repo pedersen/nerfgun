@@ -12,14 +12,13 @@ sudo raspi-config nonint do_spi 0
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y python3-dev python3-smbus python3-pip python3-rpi.gpio git i2c-tools
+sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev \
+  python3-dev python3-smbus python3-pip python3-rpi.gpio python3-dbus python3-pyudev python3-evdev python3-gi \
+  python3-pil python3-bluez python3-serial python3-dbus \
+  libcairo2-dev git i2c-tools
 sudo update-alternatives --install $(which python) python $(which $(readlink $(which python2))) 1
 sudo update-alternatives --install $(which python) python $(which $(readlink $(which python3))) 2
 sudo update-alternatives --auto python
-
-sudo apt install -y bluez bluez-tools bluez-firmware libbluetooth-dev
-sudo apt install -y python3-dbus python3-pyudev python3-evdev python3-gi python3-pil python3-bluez
-sudo apt install -y libcairo2-dev
 sudo apt clean
 
 cd ${HOME}
