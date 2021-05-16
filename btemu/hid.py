@@ -57,7 +57,7 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
             self.fd = -1
 
 
-class BTKbDevice:
+class BtHidDevice:
     """
     create a bluetooth device to emulate a HID keyboard
     """
@@ -172,9 +172,9 @@ class BTKbDevice:
         manager = dbus.Interface(self.bus.get_object(constants.BUS_NAME, constants.BUS_NAME_PATH),
                                  constants.PROFILE_MANAGER)
 
-        HumanInterfaceDeviceProfile(self.bus, BTKbDevice.PROFILE_DBUS_PATH)
+        HumanInterfaceDeviceProfile(self.bus, BtHidDevice.PROFILE_DBUS_PATH)
 
-        manager.RegisterProfile(BTKbDevice.PROFILE_DBUS_PATH, constants.UUID, opts)
+        manager.RegisterProfile(BtHidDevice.PROFILE_DBUS_PATH, constants.UUID, opts)
 
         logging.info('Profile registered ')
 
@@ -222,7 +222,7 @@ class BTKbService(dbus.service.Object):
         dbus.service.Object.__init__(self, bus_name, constants.DBUS_PATH_NAME)
 
         # create and setup our device
-        self.device = BTKbDevice() if btdevice is None else btdevice
+        self.device = BtHidDevice() if btdevice is None else btdevice
 
         # start listening for socket connections
         self.device.listen()
@@ -258,8 +258,8 @@ def main():
     try:
         cfg = BtConfig(options.filename)
         DBusGMainLoop(set_as_default=True)
-        btkbdevice = BTKbDevice(dev_name=cfg.devname) if cfg.devname else None
-        myservice = BTKbService(btdevice=btkbdevice)
+        bthiddevice = BtHidDevice(dev_name=cfg.devname) if cfg.devname else None
+        myservice = BTKbService(btdevice=bthiddevice)
         global loop
         loop = GLib.MainLoop()
         loop.run()

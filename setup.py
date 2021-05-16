@@ -36,7 +36,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'btemu-serve = btemu.hci:main',
+            'btemu-serve = btemu.hid:main',
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
             'btemu-power = btemu.power:main',
