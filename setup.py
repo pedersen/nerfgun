@@ -39,7 +39,6 @@ setup(
             'btemu-serve = btemu.hid:main',
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
-            'btemu-power = btemu.power:main',
             'btemu-controller = btemu.controller:main',
             'btemu-setup = btemu.install:main',
         ],

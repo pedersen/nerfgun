@@ -1,4 +1,7 @@
 import logging
+
+import subprocess
+
 logging.basicConfig(level=logging.DEBUG)
 
 import sys
@@ -22,7 +25,7 @@ class PinState:
     key: str
 
 
-def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
+def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
     now = time.time()
 
     keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
@@ -35,12 +38,18 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat):
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     for pin in mouse.keys():
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(powerpin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
     keyboard = KeyboardClient()
     mouse = MouseClient()
 
     logging.info("Polling mouse and keyboard events")
     while True:
         now = time.time()
+        state = GPIO.input(powerpin)
+        if state == GPIO.HIGH:
+            subprocess.call(['shutdown', '-h', 'now'], shell=False)
+
         for pin in modpins:
             state = GPIO.input(pin.pinnum)
             if state == GPIO.HIGH:
