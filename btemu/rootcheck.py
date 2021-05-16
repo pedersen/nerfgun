@@ -2,10 +2,13 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 import os
-import sys
+
+
+class NotRootUser(Exception):
+    pass
 
 
 def rootcheck():
     if not os.geteuid() == 0:
         logging.error("Only root can run this script")
-        sys.exit(1)
+        raise NotRootUser("Only root can run this script")
