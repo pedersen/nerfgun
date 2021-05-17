@@ -1,4 +1,7 @@
 import logging
+import os
+import shutil
+
 logging.basicConfig(level=logging.DEBUG)
 from importlib.resources import read_text
 from subprocess import check_call
@@ -21,6 +24,10 @@ def main():
                            ('/lib/systemd/system/btemu-hid.service', 'btemu-hid.service'),
                            ('/lib/systemd/system/bluetooth.service', 'bluetooth.service')]:
         write_resource(fname, btemu.resources, rname)
+
+    if os.path.exists('/boot/btemu.conf'):
+        logging.info('Found /boot/btemu.conf, installing it')
+        shutil.copy('/boot/btemu.conf', '/etc/btemu.conf')
 
     logging.info('Reloading SystemD State')
     check_call(['systemctl', 'daemon-reload'])

@@ -35,6 +35,7 @@ keywords:
       Modify the country code to match your country.
   3. Put [the install script](https://raw.githubusercontent.com/pedersen/nerfgun/main/install.sh)
      into here as well.
+  4. If you have created your version of `btemu.conf`, then place it in this same directory.
 * If you are on Windows, install [Bonjour Print Services](https://support.apple.com/kb/dl999?locale=en_US).
 * If you are on Linux, install [Avahi Daemon](http://avahi.org/). On Debian/Ubuntu and derivatives,
   `sudo apt install -y avahi-daemon avahi-dnsconfd avahi-utils`.
