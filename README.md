@@ -49,7 +49,6 @@ take some explanation. See [the installation](docs/install.md).
 
 # Todo Items
 
-* Enable proper pairing for bluetooth, including pin code verification
 * Have the controller reconnect when it's ready to begin use
 * Turn on and start using the pioled display
 * Modify setup.py to produce an actual installable package
