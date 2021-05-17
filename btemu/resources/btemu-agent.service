@@ -1,0 +1,12 @@
+[Unit]
+Description=Raspberry Pi Custom Controller Bluetooth Agent
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/btemu-agent
+LimitNPROC=1
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

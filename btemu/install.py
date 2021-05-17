@@ -17,6 +17,7 @@ def write_resource(fname, resource_module, resource_name):
 def main():
     for (fname, rname) in [('/etc/btemu.conf', 'btemu.conf'),
                            ('/etc/dbus-1/system.d/org.thanhle.btkbservice.conf', 'org.thanhle.btkbservice.conf'),
+                           ('/lib/systemd/system/btemu-agent.service', 'btemu-agent.service'),
                            ('/lib/systemd/system/btemu-hid.service', 'btemu-hid.service'),
                            ('/lib/systemd/system/bluetooth.service', 'bluetooth.service')]:
         write_resource(fname, btemu.resources, rname)
@@ -24,7 +25,7 @@ def main():
     logging.info('Reloading SystemD State')
     check_call(['systemctl', 'daemon-reload'])
 
-    daemons = ['bluetooth', 'btemu-hid']
+    daemons = ['bluetooth', 'btemu-hid', 'btemu-agent']
     for daemon in daemons:
         logging.info(f'Enabling {daemon}')
         check_call(['systemctl', 'enable', daemon])

@@ -163,8 +163,8 @@ class BtHidDevice:
 
         opts = {
             'Role': 'server',
-            'RequireAuthentication': False,
-            'RequireAuthorization': False,
+            'RequireAuthentication': True,
+            'RequireAuthorization': True,
             'AutoConnect': True,
             'ServiceRecord': constants.sdp_record,
         }
