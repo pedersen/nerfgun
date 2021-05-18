@@ -1,5 +1,6 @@
 [Unit]
 Description=Raspberry Pi Custom Controller Keyboard/Mouse Event Forwarder
+Before=bluetooth.service
 
 [Service]
 Type=simple

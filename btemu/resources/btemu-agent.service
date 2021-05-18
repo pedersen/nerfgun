@@ -1,5 +1,6 @@
 [Unit]
 Description=Raspberry Pi Custom Controller Bluetooth Agent
+Before=bluetooth.service
 
 [Service]
 Type=simple
