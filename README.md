@@ -60,3 +60,12 @@ take some explanation. See [the installation](docs/install.md).
   (useful for games which simulate such motion, or when needing to turn around 360, etc)
 * Add controller mode which will allow to be connected as xbox/ps5/etc controller instead of
   keyboard/mouse
+  
+# Credits
+
+* Adafruit Industries
+  * https://github.com/adafruit/Adafruit_Python_BNO055
+  * https://github.com/adafruit/Adafruit_Python_SSD1306
+* Thanle - https://thanhle.me/emulate-bluetooth-mouse-with-raspberry-pi/
+* keef - http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyboard-with.html 
+* Barry Byford - https://gist.github.com/ukBaz/a47e71e7b87fbc851b27cde7d1c0fcf0
