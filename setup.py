@@ -37,10 +37,10 @@ setup(
     entry_points={
         'console_scripts': [
             'btemu-agent = btemu.agent:main',
-            'btemu-serve = btemu.hid:main',
+            'btemu-controller = btemu.controller:main',
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
-            'btemu-controller = btemu.controller:main',
+            'btemu-serve = btemu.hid:main',
             'btemu-setup = btemu.install:main',
         ],
     },

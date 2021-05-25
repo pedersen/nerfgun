@@ -6,7 +6,7 @@ ConditionPathIsDirectory=/sys/class/bluetooth
 [Service]
 Type=dbus
 BusName=org.bluez
-ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=input,sap
+ExecStart=/usr/lib/bluetooth/bluetoothd --noplugin=input,sap,wiimote,a2dp,avrcp,network
 NotifyAccess=main
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 LimitNPROC=1

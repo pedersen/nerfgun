@@ -101,8 +101,8 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
 def main():
     rootcheck()
     parser = OptionParser()
-    parser.add_option("-c", "--conf", dest="filename",
-                      help="path of config file to use", metavar="FILE")
+    parser.add_option("-c", "--conf", dest="filename", help="path of config file to use", metavar="FILE",
+                      default="/etc/btemu.conf")
     (options, args) = parser.parse_args()
     if not options.filename:
         logging.error("*** Must supply config file parameter!")
@@ -114,8 +114,9 @@ def main():
         mouse = cfg.mousepins
         cycle = cfg.cycle
         mouse_repeat = cfg.mouse_repeat
+        powerpin = cfg.powerpin
 
-        mainloop(keys, mods, mouse, cycle, mouse_repeat)
+        mainloop(keys, mods, mouse, cycle, mouse_repeat, powerpin)
     except KeyboardInterrupt:
         sys.exit()
 

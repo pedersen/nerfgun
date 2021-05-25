@@ -9,6 +9,8 @@ sudo raspi-config nonint do_serial 1 0
 sudo raspi-config nonint set_config_var enable_uart 1 /boot/config.txt
 sudo raspi-config nonint do_i2c 0
 sudo raspi-config nonint do_spi 0
+sudo systemctl disable serial-getty@ttyAMA0.service
+
 
 sudo apt update
 sudo apt upgrade -y

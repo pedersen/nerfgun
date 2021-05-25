@@ -1,75 +1,20 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+import sys
 from optparse import OptionParser
 
 import dbus
 import dbus.service
 import dbus.mainloop.glib
-from gi.repository import GObject
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
 
 from . import constants
+from .agent_helpers import set_trusted
+from .cfg import BtConfig
 from .rootcheck import rootcheck
-
-bus = None
-device_obj = None
-dev_path = None
-mainloop = None
-
-
-def get_managed_objects():
-    bus = dbus.SystemBus()
-    manager = dbus.Interface(bus.get_object(constants.BUS_NAME, "/"), constants.DBUS_OBJECT_MANAGER)
-    return manager.GetManagedObjects()
-
-
-def find_adapter(pattern=None):
-    return find_adapter_in_objects(get_managed_objects(), pattern)
-
-
-def find_adapter_in_objects(objects, pattern=None):
-    bus = dbus.SystemBus()
-    for path, ifaces in objects.iteritems():
-        adapter = ifaces.get(constants.ADAPTER_INTERFACE)
-        if adapter is None:
-            continue
-        if not pattern or pattern == adapter["Address"] or \
-                path.endswith(pattern):
-            obj = bus.get_object(constants.BUS_NAME, path)
-            return dbus.Interface(obj, constants.ADAPTER_INTERFACE)
-    raise Exception("Bluetooth adapter not found")
-
-
-def find_device(device_address, adapter_pattern=None):
-    return find_device_in_objects(get_managed_objects(), device_address, adapter_pattern)
-
-
-def find_device_in_objects(objects, device_address, adapter_pattern=None):
-    bus = dbus.SystemBus()
-    path_prefix = ""
-    if adapter_pattern:
-        adapter = find_adapter_in_objects(objects, adapter_pattern)
-        path_prefix = adapter.object_path
-    for path, ifaces in objects.iteritems():
-        device = ifaces.get(constants.DEVICE_INTERFACE)
-        if device is None:
-            continue
-        if (device["Address"] == device_address and
-                path.startswith(path_prefix)):
-            obj = bus.get_object(constants.BUS_NAME, path)
-            return dbus.Interface(obj, constants.DEVICE_INTERFACE)
-
-    raise Exception("Bluetooth device not found")
-
-
-def set_trusted(path):
-    props = dbus.Interface(bus.get_object(constants.BUS_NAME, path), constants.DBUS_PROPERTIES)
-    props.Set(constants.DEVICE_INTERFACE, "Trusted", True)
-
-
-def dev_connect(path):
-    dev = dbus.Interface(bus.get_object(constants.BUS_NAME, path), constants.DEVICE_INTERFACE)
-    dev.Connect()
+from .state import BtState
 
 
 class Rejected(dbus.DBusException):
@@ -86,20 +31,21 @@ class Agent(dbus.service.Object):
     def Release(self):
         logging.debug("Release")
         if self.exit_on_release:
-            mainloop.quit()
+            BtState().loop.quit()
 
     @dbus.service.method(constants.AGENT_INTERFACE, in_signature="os", out_signature="")
     def AuthorizeService(self, device, uuid):
-        return
+        logging.info(f"Authorize {device} - {uuid}")
 
     @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="s")
     def RequestPinCode(self, device):
-        logging.debug("RequestPinCode (%s)" % (device))
+        logging.debug(f"RequestPinCode {device}")
         set_trusted(device)
         return "0000"
 
     @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="u")
     def RequestPasskey(self, device):
+        logging.debug(f"RequestPinCode (device)")
         set_trusted(device)
         return dbus.UInt32("000000")
 
@@ -113,6 +59,7 @@ class Agent(dbus.service.Object):
 
     @dbus.service.method(constants.AGENT_INTERFACE, in_signature="ou", out_signature="")
     def RequestConfirmation(self, device, passkey):
+        logging.info(f"Requesting Confirmation - {device} - {passkey}")
         set_trusted(device)
 
     @dbus.service.method(constants.AGENT_INTERFACE, in_signature="o", out_signature="")
@@ -124,62 +71,35 @@ class Agent(dbus.service.Object):
         logging.debug("Cancel")
 
 
-def pair_reply():
-    logging.debug("Device paired")
-    set_trusted(dev_path)
-    dev_connect(dev_path)
-    mainloop.quit()
-
-
-def pair_error(error):
-    err_name = error.get_dbus_name()
-    if err_name == "org.freedesktop.DBus.Error.NoReply" and device_obj:
-        logging.debug("Timed out. Cancelling pairing")
-        device_obj.CancelPairing()
-    else:
-        logging.debug(f"Creating device failed: {str(error)}")
-    mainloop.quit()
-
-
 def main():
-    global mainloop, dev_path, device_obj
     rootcheck()
-
-    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-
-    bus = dbus.SystemBus()
-
-    capability = "NoInputNoOutput"
-
     parser = OptionParser()
-    parser.add_option("-i", "--adapter", action="store",
-                      type="string",
-                      dest="adapter_pattern",
-                      default=None)
-    parser.add_option("-c", "--capability", action="store",
-                      type="string", dest="capability")
-    parser.add_option("-t", "--timeout", action="store",
-                      type="int", dest="timeout",
-                      default=60000)
+    parser.add_option("-c", "--conf", dest="filename", help="path of config file to use", metavar="FILE",
+                      default="/etc/btemu.conf")
     (options, args) = parser.parse_args()
-    if options.capability:
-        capability = options.capability
+    if not options.filename:
+        logging.error("*** Must supply config file parameter!")
+        parser.print_help()
+        sys.exit(2)
+    try:
+        app = BtState()
+        app.cfg = BtConfig(options.filename)
+        DBusGMainLoop(set_as_default=True)
 
-    path = constants.AGENT_PATH
-    agent = Agent(bus, path)
+        app.bus = dbus.SystemBus()
+        app.agent = Agent(app.bus, constants.AGENT_PATH)
+        app.agent.set_exit_on_release(False)
+        obj = app.bus.get_object(constants.BUS_NAME, constants.BUS_NAME_PATH)
+        app.manager = dbus.Interface(obj, constants.AGENT_MANAGER)
+        app.manager.RegisterAgent(constants.AGENT_PATH, constants.CAPABILITY)
+        app.manager.RequestDefaultAgent(constants.AGENT_PATH)
+        logging.debug("Agent registered")
 
-    mainloop = GObject.MainLoop()
-
-    obj = bus.get_object(constants.BUS_NAME, constants.BUS_NAME_PATH)
-    manager = dbus.Interface(obj, constants.AGENT_MANAGER)
-    manager.RegisterAgent(path, capability)
-
-    logging.debug("Agent registered")
-
-    manager.RequestDefaultAgent(path)
-
-    mainloop.run()
+        app.loop = GLib.MainLoop()
+        app.loop.run()
+    except KeyboardInterrupt:
+        sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

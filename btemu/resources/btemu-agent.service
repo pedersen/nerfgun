@@ -1,10 +1,10 @@
 [Unit]
-Description=Raspberry Pi Custom Controller Bluetooth Agent
+Description=Raspberry Pi Custom Controller Bluetooth Pairing Agent
 Before=bluetooth.service
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/btemu-agent
+ExecStart=/usr/local/bin/btemu-agent --conf /etc/btemu.conf
 LimitNPROC=1
 ProtectHome=true
 ProtectSystem=full

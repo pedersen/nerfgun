@@ -190,6 +190,7 @@ DBUS_PROPERTIES = "org.freedesktop.DBus.Properties"
 
 # bluetooth constants
 
+CAPABILITY = "NoInputNoOutput"
 INPUT_REPORT = 0xA1
 KBD_EVENT = 1
 MOUSE_EVENT = 2
