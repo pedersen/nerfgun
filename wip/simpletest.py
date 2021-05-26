@@ -68,22 +68,29 @@ def rmap(x: float, in_min: float, in_max: float, out_min: float, out_max: float)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
+import logging.config
+logging.config.fileConfig('/etc/btemu/btemu-logging.ini')
 print('Reading BNO055 data, press Ctrl-C to quit...')
 while True:
+    x = y = z = w = heading = roll = pitch = 0
     # Read the Euler angles for heading, roll, pitch (all in degrees).
-    heading, roll, pitch = bno.read_euler()
+    # heading, roll, pitch = bno.read_euler()
     # Read the calibration status, 0=uncalibrated and 3=fully calibrated.
-    sys, gyro, accel, mag = bno.get_calibration_status()
+    system, gyro, accel, mag = bno.get_calibration_status()
     # Print everything out.
-    v = rmap(heading, 0, 360, -128, 127)
-    print(v)
-    mouse.dx = v
-    mouse.send()
-    #print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(
-    #      heading, roll, pitch, sys, gyro, accel, mag))
+    #v = rmap(heading, 0, 360, -128, 127)
+    #print(v)
+    #mouse.dx = v
+    #mouse.send()
+    logging.info(f'Sys_cal={system} Gyro_cal={gyro} Accel_cal={accel} Mag_cal={mag}')
+    if system == gyro == accel == mag == 3:
+        data = bno.get_calibration()
+        import json
+        json.dump(data, open('/etc/btemu/calibrationdata.json', 'w'))
+    #logging.info(f'Heading={heading:0.2F} Roll={roll:0.2F} Pitch={pitch:0.2F}')
     # Other values you can optionally read:
     # Orientation as a quaternion:
-    #x,y,z,w = bno.read_quaterion()
+    #x,y,z,w = bno.read_quaternion()
     # Sensor temperature in degrees Celsius:
     #temp_c = bno.read_temp()
     # Magnetometer data (in micro-Teslas):
@@ -99,5 +106,10 @@ while True:
     # in meters per second squared):
     #x,y,z = bno.read_gravity()
     #print(f"x: {x}, y: {y}, z: {z}")
+    x = rmap(x, -1, 1, -128, 127)
+    y = rmap(y, -1, 1, -128, 127)
+    z = rmap(z, -1, 1, -128, 127)
+    w = rmap(w, -1, 1, -128, 127)
+    #logging.info(f"{x}, {y}, {z}, {w}")
     # Sleep for a second until the next reading.
     time.sleep(1)

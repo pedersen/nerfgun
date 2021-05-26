@@ -53,8 +53,12 @@ def degreemap(x: float) -> int:
     return int(rmap(x, 0, 360, -127, 126))
 
 
+def limitrange(x:float):
+    return min(125, max(-125, x))
+
+
 def spacemap(x: float, y: float, z: float) -> Tuple[int, int, int]:
-    return -degreemap(x), -int(rmap(y, -90, 90, -127, 126)), degreemap(z)
+    return limitrange(-degreemap(x)), limitrange(-int(rmap(y, -90, 90, -127, 126))), limitrange(degreemap(z))
 
 
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibrationpath):
