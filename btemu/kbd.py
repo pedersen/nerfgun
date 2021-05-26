@@ -12,8 +12,6 @@
 # Ported to a Python module by Thanh Le
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
 import sys
 import time
 from optparse import OptionParser

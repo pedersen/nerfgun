@@ -1,14 +1,11 @@
 import logging
-import time
-
-logging.basicConfig(level=logging.DEBUG)
-
 import sys
-import dbus
+import time
 from optparse import OptionParser
 
-from .rootcheck import rootcheck
+import dbus
 from . import constants
+from .rootcheck import rootcheck
 
 
 class InvalidMouseButton(Exception):

@@ -8,9 +8,6 @@ http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyb
 Moved to Python 3 and tested with BlueZ 5.43
 """
 import logging
-
-logging.basicConfig(level=logging.DEBUG)
-
 import sys
 from optparse import OptionParser
 

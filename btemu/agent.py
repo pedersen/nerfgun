@@ -1,6 +1,4 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
 import sys
 from optparse import OptionParser
 

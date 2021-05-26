@@ -1,5 +1,4 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 import dbus
 import dbus.service

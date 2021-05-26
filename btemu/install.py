@@ -1,8 +1,6 @@
 import logging
 import os
 import shutil
-
-logging.basicConfig(level=logging.DEBUG)
 from importlib.resources import read_text
 from subprocess import check_call
 
