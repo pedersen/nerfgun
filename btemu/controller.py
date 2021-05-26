@@ -31,6 +31,11 @@ class PinState:
     transition: float
     key: str
 
+@dataclass
+class Point:
+    x: float
+    y: float
+    z: float
 
 def displayoff(signum, frame):
     disp = SSD1306.SSD1306_128_32(rst=None)
@@ -49,16 +54,16 @@ def rmap(x: float, in_min: float, in_max: float, out_min: float, out_max: float)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
-def degreemap(x: float) -> int:
-    return int(rmap(x, 0, 360, -127, 126))
+def degreemap(x: float) -> float:
+    return rmap(x, 0, 360, -128, 127)
 
 
-def limitrange(x:float):
-    return min(125, max(-125, x))
+def limitrange(x:float) -> int:
+    return min(127, max(-128, round(x)))
 
 
-def spacemap(x: float, y: float, z: float) -> Tuple[int, int, int]:
-    return limitrange(-degreemap(x)), limitrange(-int(rmap(y, -90, 90, -127, 126))), limitrange(degreemap(z))
+def to_mouse_delta(x: float, y: float) -> int:
+    return limitrange(rmap(x - y, -60, 60, -128, 127))
 
 
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibrationpath):
@@ -89,7 +94,7 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
 
     # get position at start to ensure relative positioning
     heading, roll, pitch = bno.read_euler()
-    cdx, cdy, cdz = spacemap(heading, roll, pitch)
+    origin = Point(degreemap(heading), degreemap(roll), degreemap(pitch))
     now = time.time()
 
     keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
@@ -160,21 +165,12 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
                 pin.transition = now
 
         heading, roll, pitch = bno.read_euler()
-        newcdx, newcdy, newcdz = spacemap(heading, roll, pitch)
-        minshift = 5
-        if abs(newcdx - cdx) > minshift:
-            cdx = mouse.dx = newcdx
-        else:
-            mouse.dx = 0
-        if abs(newcdy - cdy) > minshift:
-            cdy = mouse.dy = newcdy
-        else:
-            mouse.dy = 0
-        if abs(newcdz - cdz) > minshift:
-            cdz = mouse.dz = newcdz
-        else:
-            mouse.dz = 0
+        current = Point(degreemap(heading), degreemap(roll), degreemap(pitch))
+        mouse.dx = to_mouse_delta(origin.x, current.x)
+        mouse.dy = to_mouse_delta(origin.y, current.y)
+        mouse.dz = to_mouse_delta(origin.z, current.z)
         mouse.send()
+        
         sys, gyro, accel, mag = bno.get_calibration_status()
         draw.text((x,top), f"Sys {sys} Gyro {gyro} Acc {accel} Mag {mag}", font=font, fill=255)
         disp.image(image)
