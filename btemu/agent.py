@@ -73,7 +73,7 @@ def main():
     rootcheck()
     parser = OptionParser()
     parser.add_option("-c", "--conf", dest="filename", help="path of config file to use", metavar="FILE",
-                      default="/etc/btemu.conf")
+                      default="/etc/btemu/btemu.conf")
     (options, args) = parser.parse_args()
     if not options.filename:
         logging.error("*** Must supply config file parameter!")

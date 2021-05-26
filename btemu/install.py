@@ -16,7 +16,9 @@ def write_resource(fname, resource_module, resource_name):
 
 
 def main():
-    for (fname, rname) in [('/etc/btemu.conf', 'btemu.conf'),
+    if not os.path.exists('/etc/btemu'):
+        os.makedirs('/etc/btemu')
+    for (fname, rname) in [('/etc/btemu/btemu.conf', 'btemu.conf'),
                            ('/etc/dbus-1/system.d/org.thanhle.btkbservice.conf', 'org.thanhle.btkbservice.conf'),
                            ('/lib/systemd/system/btemu-hid.service', 'btemu-hid.service'),
                            ('/lib/systemd/system/btemu-agent.service', 'btemu-agent.service'),
@@ -25,7 +27,7 @@ def main():
 
     if os.path.exists('/boot/btemu.conf'):
         logging.info('Found /boot/btemu.conf, installing it')
-        shutil.copy('/boot/btemu.conf', '/etc/btemu.conf')
+        shutil.copy('/boot/btemu.conf', '/etc/btemu/btemu.conf')
 
     logging.info('Reloading SystemD State')
     check_call(['systemctl', 'daemon-reload'])
