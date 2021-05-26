@@ -25,8 +25,8 @@ import logging
 import sys
 import time
 
-from Adafruit_BNO055 import BNO055
-
+from btemu.adafruit import BNO055
+from btemu.mouse import MouseClient
 
 # Create and configure the BNO sensor connection.  Make sure only ONE of the
 # below 'bno = ...' lines is uncommented:
@@ -63,6 +63,15 @@ print('Accelerometer ID:   0x{0:02X}'.format(accel))
 print('Magnetometer ID:    0x{0:02X}'.format(mag))
 print('Gyroscope ID:       0x{0:02X}\n'.format(gyro))
 
+mouse = MouseClient()
+def scale_to_signed_byte(val, maxval=180.0):
+    # what percentage of the range is the value?
+    # total possible range = maxval - minval
+    # 127:x as 180:y
+    # total range / val * 127
+
+    return int((float(val)/maxval)*127)
+
 print('Reading BNO055 data, press Ctrl-C to quit...')
 while True:
     # Read the Euler angles for heading, roll, pitch (all in degrees).
@@ -70,8 +79,13 @@ while True:
     # Read the calibration status, 0=uncalibrated and 3=fully calibrated.
     sys, gyro, accel, mag = bno.get_calibration_status()
     # Print everything out.
-    print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(
-          heading, roll, pitch, sys, gyro, accel, mag))
+    heading -= 180
+    print(heading)
+    print(scale_to_signed_byte(heading))
+    mouse.dx = scale_to_signed_byte(heading)
+    mouse.send()
+    #print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(
+    #      heading, roll, pitch, sys, gyro, accel, mag))
     # Other values you can optionally read:
     # Orientation as a quaternion:
     #x,y,z,w = bno.read_quaterion()
@@ -88,7 +102,7 @@ while True:
     #x,y,z = bno.read_linear_acceleration()
     # Gravity acceleration data (i.e. acceleration just from gravity--returned
     # in meters per second squared):
-    x,y,z = bno.read_gravity()
-    print(f"x: {x}, y: {y}, z: {z}")
+    #x,y,z = bno.read_gravity()
+    #print(f"x: {x}, y: {y}, z: {z}")
     # Sleep for a second until the next reading.
     time.sleep(1)

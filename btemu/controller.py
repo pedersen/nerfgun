@@ -1,16 +1,21 @@
 import logging
-
-import subprocess
-
 logging.basicConfig(level=logging.DEBUG)
 
+import signal
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
 from optparse import OptionParser
 
 import RPi.GPIO as GPIO
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+
 from . import constants
+from .adafruit import BNO055
+from .adafruit import SSD1306
 from .cfg import BtConfig
 from .kbd import KeyboardClient
 from .mouse import MouseClient
@@ -25,7 +30,41 @@ class PinState:
     key: str
 
 
+def displayoff(signum, frame):
+    disp = SSD1306.SSD1306_128_32(rst=None)
+    disp.clear()
+    width = disp.width
+    height = disp.height
+    image = Image.new('1', (width, height))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0,0,width,height), outline=0, fill=0)
+    disp.image(image)
+    disp.display()
+    sys.exit(0)
+
+
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
+    signal.signal(signal.SIGINT, displayoff)
+    disp = SSD1306.SSD1306_128_32(rst=None)
+    disp.begin()
+    disp.clear()
+    disp.display()
+    width = disp.width
+    height = disp.height
+    image = Image.new('1', (width, height))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0,0,width,height), outline=0, fill=0)
+    padding = -2
+    top = padding
+    bottom = height-padding
+    x = 0
+    font = ImageFont.truetype('DejaVuSansMono.ttf', 8)
+    draw.rectangle((0,0,width,height), outline=0, fill=0)
+
+    bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
+    if not bno.begin():
+        raise RuntimeError('Failed to initialize BNO055! Is the sensor connected?')
+
     now = time.time()
 
     keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
@@ -33,7 +72,7 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
     mousepins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in mouse.items()]
 
     GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(GPIO.BCM)
     for pin in keycfgs.keys():
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     for pin in mouse.keys():
@@ -95,6 +134,10 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
                 mouse.send()
                 pin.transition = now
 
+        sys, gyro, accel, mag = bno.get_calibration_status()
+        draw.text((x,top), f"Sys {sys} Gyro {gyro} Acc {accel} Mag {mag}", font=font, fill=255)
+        disp.image(image)
+        disp.display()
         time.sleep(cycle)
 
 
