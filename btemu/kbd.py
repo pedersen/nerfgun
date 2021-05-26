@@ -87,6 +87,7 @@ class KeyboardClient:
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     rootcheck()
     parser = OptionParser(usage="usage: %prog string to send")
     (opts, args) = parser.parse_args()

@@ -8,6 +8,7 @@ http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyb
 Moved to Python 3 and tested with BlueZ 5.43
 """
 import logging
+import logging.config
 import sys
 from optparse import OptionParser
 
@@ -36,6 +37,7 @@ def main():
     try:
         app = BtState()
         app.cfg = BtConfig(options.filename)
+        logging.config.fileConfig(app.cfg.logging)
         DBusGMainLoop(set_as_default=True)
 
         app.bus = dbus.SystemBus()

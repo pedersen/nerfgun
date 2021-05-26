@@ -54,3 +54,11 @@ class BtConfig:
     @property
     def powerpin(self):
         return int(self.conf.get('btemu.power_down_pin', 26))  # Default pin for power down to be 26
+
+    @property
+    def logging(self):
+        return self.conf.get('btemu.log_config', '/etc/btemu/btemu-logging.ini')  # path to logging configuration file
+
+    @property
+    def calibration(self):
+        return self.conf.get('btemu.calibration', '/etc/btemu/calibrationdata.json')  # path to calibration data storage

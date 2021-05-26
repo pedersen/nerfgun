@@ -101,6 +101,7 @@ class MouseClient:
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     rootcheck()
     parser = OptionParser("usage: %prog button_num dx dy dz")
     (opts, args) = parser.parse_args()

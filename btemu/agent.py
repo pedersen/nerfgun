@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import sys
 from optparse import OptionParser
 
@@ -82,6 +83,7 @@ def main():
     try:
         app = BtState()
         app.cfg = BtConfig(options.filename)
+        logging.config.fileConfig(app.cfg.logging)
         DBusGMainLoop(set_as_default=True)
 
         app.bus = dbus.SystemBus()

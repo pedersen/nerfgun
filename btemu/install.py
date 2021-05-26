@@ -16,9 +16,11 @@ def write_resource(fname, resource_module, resource_name):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     if not os.path.exists('/etc/btemu'):
         os.makedirs('/etc/btemu')
     for (fname, rname) in [('/etc/btemu/btemu.conf', 'btemu.conf'),
+                           ('/etc/btemu/btemu-logging.ini', 'btemu-logging.ini'),
                            ('/etc/dbus-1/system.d/org.thanhle.btkbservice.conf', 'org.thanhle.btkbservice.conf'),
                            ('/lib/systemd/system/btemu-hid.service', 'btemu-hid.service'),
                            ('/lib/systemd/system/btemu-agent.service', 'btemu-agent.service'),

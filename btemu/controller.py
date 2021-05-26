@@ -1,4 +1,7 @@
+import json
 import logging
+import logging.config
+import os
 import signal
 import subprocess
 import sys
@@ -54,7 +57,7 @@ def spacemap(x: float, y: float, z: float) -> Tuple[int, int, int]:
     return -degreemap(x), -int(rmap(y, -90, 90, -127, 126)), degreemap(z)
 
 
-def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
+def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibrationpath):
     signal.signal(signal.SIGINT, displayoff)
     disp = SSD1306.SSD1306_128_32(rst=None)
     disp.begin()
@@ -75,6 +78,10 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
     bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
     if not bno.begin():
         raise RuntimeError('Failed to initialize BNO055! Is the sensor connected?')
+
+    # load calibration data if it exists
+    if os.path.exists(calibrationpath):
+        bno.set_calibration(json.load(open(calibrationpath)))
 
     # get position at start to ensure relative positioning
     heading, roll, pitch = bno.read_euler()
@@ -183,13 +190,14 @@ def main():
         sys.exit(2)
     try:
         cfg = BtConfig(options.filename)
+        logging.config.fileConfig(cfg.logging)
         keys, mods = cfg.keyboardpins
         mouse = cfg.mousepins
         cycle = cfg.cycle
         mouse_repeat = cfg.mouse_repeat
         powerpin = cfg.powerpin
 
-        mainloop(keys, mods, mouse, cycle, mouse_repeat, powerpin)
+        mainloop(keys, mods, mouse, cycle, mouse_repeat, powerpin, cfg.calibration)
     except KeyboardInterrupt:
         sys.exit()
 
