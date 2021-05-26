@@ -64,13 +64,9 @@ print('Magnetometer ID:    0x{0:02X}'.format(mag))
 print('Gyroscope ID:       0x{0:02X}\n'.format(gyro))
 
 mouse = MouseClient()
-def scale_to_signed_byte(val, maxval=180.0):
-    # what percentage of the range is the value?
-    # total possible range = maxval - minval
-    # 127:x as 180:y
-    # total range / val * 127
+def rmap(x: float, in_min: float, in_max: float, out_min: float, out_max: float) -> float:
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-    return int((float(val)/maxval)*127)
 
 print('Reading BNO055 data, press Ctrl-C to quit...')
 while True:
@@ -79,10 +75,9 @@ while True:
     # Read the calibration status, 0=uncalibrated and 3=fully calibrated.
     sys, gyro, accel, mag = bno.get_calibration_status()
     # Print everything out.
-    heading -= 180
-    print(heading)
-    print(scale_to_signed_byte(heading))
-    mouse.dx = scale_to_signed_byte(heading)
+    v = rmap(heading, 0, 360, -128, 127)
+    print(v)
+    mouse.dx = v
     mouse.send()
     #print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(
     #      heading, roll, pitch, sys, gyro, accel, mag))

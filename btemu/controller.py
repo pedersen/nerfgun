@@ -7,6 +7,7 @@ import sys
 import time
 from dataclasses import dataclass
 from optparse import OptionParser
+from typing import Tuple
 
 import RPi.GPIO as GPIO
 from PIL import Image
@@ -43,6 +44,18 @@ def displayoff(signum, frame):
     sys.exit(0)
 
 
+def rmap(x: float, in_min: float, in_max: float, out_min: float, out_max: float) -> float:
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+
+def degreemap(x: float) -> int:
+    return int(rmap(x, 0, 360, -127, 126))
+
+
+def spacemap(x: float, y: float, z: float) -> Tuple[int, int, int]:
+    return -degreemap(x), -int(rmap(y, -90, 90, -127, 126)), degreemap(z)
+
+
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
     signal.signal(signal.SIGINT, displayoff)
     disp = SSD1306.SSD1306_128_32(rst=None)
@@ -65,6 +78,9 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
     if not bno.begin():
         raise RuntimeError('Failed to initialize BNO055! Is the sensor connected?')
 
+    # get position at start to ensure relative positioning
+    heading, roll, pitch = bno.read_euler()
+    cdx, cdy, cdz = spacemap(heading, roll, pitch)
     now = time.time()
 
     keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
@@ -134,6 +150,22 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin):
                 mouse.send()
                 pin.transition = now
 
+        heading, roll, pitch = bno.read_euler()
+        newcdx, newcdy, newcdz = spacemap(heading, roll, pitch)
+        minshift = 5
+        if abs(newcdx - cdx) > minshift:
+            cdx = mouse.dx = newcdx
+        else:
+            mouse.dx = 0
+        if abs(newcdy - cdy) > minshift:
+            cdy = mouse.dy = newcdy
+        else:
+            mouse.dy = 0
+        if abs(newcdz - cdz) > minshift:
+            cdz = mouse.dz = newcdz
+        else:
+            mouse.dz = 0
+        mouse.send()
         sys, gyro, accel, mag = bno.get_calibration_status()
         draw.text((x,top), f"Sys {sys} Gyro {gyro} Acc {accel} Mag {mag}", font=font, fill=255)
         disp.image(image)
