@@ -40,7 +40,7 @@ setup(
             'btemu-controller = btemu.controller:main',
             'btemu-send-string = btemu.kbd:main',
             'btemu-send-mouse = btemu.mouse:main',
-            'btemu-serve = btemu.hid:main',
+            'btemu-hid = btemu.hid:main',
             'btemu-setup = btemu.install:main',
         ],
     },
