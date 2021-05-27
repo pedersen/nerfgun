@@ -1,5 +1,6 @@
 from enum import IntEnum, IntFlag, unique
 
+FONTSIZE=10
 
 # keyboard constants
 @unique

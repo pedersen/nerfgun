@@ -31,11 +31,32 @@ class PinState:
     transition: float
     key: str
 
-@dataclass
+
 class Point:
-    x: float
-    y: float
-    z: float
+    @staticmethod
+    def degree_normalize(x: float) -> float:
+        return x - 360 if x > 180 else x
+
+    @staticmethod
+    def degree_to_byte(x: float):
+        return limitrange(rmap(x, -180, 180, -128, 127))
+
+    def __init__(self, x=0.0, y=0.0, z=0.0):
+        self.x = self.degree_normalize(x)
+        self.y = self.degree_normalize(y)
+        self.z = self.degree_normalize(z)
+
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y, self.z-other.z)
+
+    def __mul__(self, other):
+        return Point(self.x * other.x, self.y * other.y, self.z*other.z)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __repr__(self):
+        return f"Point(x={self.x:03.3f}, y={self.y:03.3f}, z={self.z:03.3f})"
 
 def displayoff(signum, frame):
     disp = SSD1306.SSD1306_128_32(rst=None)
@@ -54,16 +75,14 @@ def rmap(x: float, in_min: float, in_max: float, out_min: float, out_max: float)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
-def degreemap(x: float) -> float:
-    return rmap(x, 0, 360, -128, 127)
-
-
 def limitrange(x:float) -> int:
     return min(127, max(-128, round(x)))
 
 
 def to_mouse_delta(x: float, y: float) -> int:
-    return limitrange(rmap(x - y, -60, 60, -128, 127))
+    diff = x-y
+    logging.info(f"difference is {diff}")
+    return limitrange(rmap(diff, -360, 360, -128, 127))
 
 
 def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibrationpath):
@@ -81,7 +100,7 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
     top = padding
     bottom = height-padding
     x = 0
-    font = ImageFont.truetype('DejaVuSansMono.ttf', 8)
+    font = ImageFont.truetype('DejaVuSansMono.ttf', constants.FONTSIZE)
     draw.rectangle((0,0,width,height), outline=0, fill=0)
 
     bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
@@ -93,8 +112,8 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
         bno.set_calibration(json.load(open(calibrationpath)))
 
     # get position at start to ensure relative positioning
-    heading, roll, pitch = bno.read_euler()
-    origin = Point(degreemap(heading), degreemap(roll), degreemap(pitch))
+    speed = Point(1, 1, 1)
+    origin = Point(*bno.read_euler())
     now = time.time()
 
     keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
@@ -164,15 +183,19 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
                 mouse.send()
                 pin.transition = now
 
-        heading, roll, pitch = bno.read_euler()
-        current = Point(degreemap(heading), degreemap(roll), degreemap(pitch))
-        mouse.dx = to_mouse_delta(origin.x, current.x)
-        mouse.dy = to_mouse_delta(origin.y, current.y)
-        mouse.dz = to_mouse_delta(origin.z, current.z)
+        current = Point(*bno.read_euler())
+        diff = (origin - current) * speed
+        minshift = 0.5
+        if abs(diff.x) > minshift:
+            mouse.dx = diff.degree_to_byte(diff.x)
+        if abs(diff.y) > minshift:
+            mouse.dy = diff.degree_to_byte(diff.y)
+        if abs(diff.z) > minshift:
+            mouse.dz = diff.degree_to_byte(diff.z)
         mouse.send()
-        
+
         sys, gyro, accel, mag = bno.get_calibration_status()
-        draw.text((x,top), f"Sys {sys} Gyro {gyro} Acc {accel} Mag {mag}", font=font, fill=255)
+        draw.text((x, top), f"Sys {sys} Gyro {gyro} Acc {accel} Mag {mag}", font=font, fill=255)
         disp.image(image)
         disp.display()
         time.sleep(cycle)
