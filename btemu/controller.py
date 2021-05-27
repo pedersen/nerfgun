@@ -162,8 +162,17 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
 
         keyboard.send_key_state()
 
+        current = Point(*bno.read_euler())
+        diff = (origin - current) * speed
+        minshift = 0.5
+        if abs(diff.x) > minshift:
+            mouse.dx = diff.degree_to_byte(diff.x)
+        if abs(diff.y) > minshift:
+            mouse.dy = diff.degree_to_byte(diff.y)
+        if abs(diff.z) > minshift:
+            mouse.dz = diff.degree_to_byte(diff.z)
+            
         for pin in mousepins:
-            # TODO: Fix up using the 9-DOF sensor once new soldering iron arrives
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
                 if state == GPIO.HIGH:
@@ -183,15 +192,6 @@ def mainloop(keycfgs, modcfgs, mouse, cycle, mouse_repeat, powerpin, calibration
                 mouse.send()
                 pin.transition = now
 
-        current = Point(*bno.read_euler())
-        diff = (origin - current) * speed
-        minshift = 0.5
-        if abs(diff.x) > minshift:
-            mouse.dx = diff.degree_to_byte(diff.x)
-        if abs(diff.y) > minshift:
-            mouse.dy = diff.degree_to_byte(diff.y)
-        if abs(diff.z) > minshift:
-            mouse.dz = diff.degree_to_byte(diff.z)
         mouse.send()
 
         sys, gyro, accel, mag = bno.get_calibration_status()
