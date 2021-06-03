@@ -1,6 +1,9 @@
-/.idea/
-/nerfgun.iml
-/btemu.egg-info/
-/build/
-/dist/
-/*/__pycache__/
+.idea
+nerfgun.iml
+btemu.egg-info
+build
+dist
+__pycache__
+cmake-build-debug
+Testing
+*.cbp
