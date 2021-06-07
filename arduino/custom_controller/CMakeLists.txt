@@ -9,8 +9,8 @@ set(${PROJECT_NAME}_BOARD megaADK)
 project(${PROJECT_NAME})
 
 # Define additional source and header files or default arduino sketch files
-# set(${PROJECT_NAME}_SRCS)
-# set(${PROJECT_NAME}_HDRS)
+set(${PROJECT_NAME}_SRCS "${PROJECT_SOURCE_DIR}/src/")
+set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/inc/")
 
 ### Additional static libraries to include in the target.
 # set(${PROJECT_NAME}_LIBS)
@@ -30,8 +30,8 @@ set(${PROJECT_NAME}_SKETCH custom_controller.ino)
 # set(_RECURSE true)
 
 #### Additional settings for programmer. From programmers.txt
-set(${PROJECT_NAME}_PROGRAMMER avrdude)
-set(${PROJECT_NAME}_PORT /dev/ttyACM1)
+set(${PROJECT_NAME}_PROGRAMMER avrisp)
+set(${PROJECT_NAME}_PORT /dev/ttyACM0)
 # set(mega.upload.speed 9600)
 
 ## Verbose build process
