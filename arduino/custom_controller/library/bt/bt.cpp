@@ -3,24 +3,24 @@
 //
 
 #include "bt/bt.h"
+#include <SoftwareSerial.h>
 
 namespace bt {
     // TX-O pin of bluetooth mate, Arduino D2
     const int bluetoothTx = 10;
     // RX-I pin of bluetooth mate, Arduino D3
     const int bluetoothRx = 11;
-
     SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
 
     const int init_baudrate = 115200;  // bluetooth speed during initialization, bluesmirf starts at this speed
     const int running_baudrate = 19200;  // bluetooth speed after initialization
-    const char* running_baudrate_str = "19.2"; // bluetooth baud rate as string for the bt modem
+    const String running_baudrate_str = "19.2"; // bluetooth baud rate as string for the bt modem
     const char* device_name = "Nerf AR-L Controller";
     const int cmd_delay = 500; // how much to delay after starting command mode
     void setup() {
         switch_baud_rate();
         bluetooth.begin(running_baudrate);
-        bluetooth.println("C");
+        //bluetooth.println("C");
         Serial.println("done config!");
     }
 
@@ -43,7 +43,7 @@ namespace bt {
         delay(cmd_delay*5);
 
         start_command_mode();
-        bluetooth.println("SM,4"); // use DTR mode to automatically store last BT ID that connected
+        bluetooth.println("SM,6"); // use Pairing mode to automatically store last BT ID that connected
         delay(cmd_delay);
         bluetooth.println("SO,%"); // print out CONNECT/DISCONNECT messages for debugging
         delay(cmd_delay);
@@ -70,13 +70,31 @@ namespace bt {
         bluetooth.begin(init_baudrate);  // The Bluetooth Mate defaults to 115200bps
         start_command_mode();
         delay(cmd_delay);  // Short delay, wait for the Mate to send back CMD
-        bluetooth.print("U,");
-        bluetooth.print(running_baudrate_str);
-        bluetooth.println(",N");  // Temporarily Change the baudrate to running baud rate, no parity
+        bluetooth.println("U," + running_baudrate_str + ",N");  // Temporarily Change the baudrate to running baud rate, no parity
         // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
         bluetooth.begin(running_baudrate);  // Start bluetooth serial at running_baud_rate
         delay(cmd_delay);
     }
 
+    int available() {
+        return bluetooth.available();
+    }
+
+    int read() {
+        return bluetooth.read();
+    }
+
+    size_t print(char ch) {
+        return bluetooth.print(ch);
+    }
+
+    size_t print(String str) {
+        return bluetooth.print(str.c_str());
+    }
+
+    size_t println(String str) {
+        return bluetooth.print(str.c_str()) +
+            bluetooth.println("");
+    }
 }
 

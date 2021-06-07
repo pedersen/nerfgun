@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 
 #include "bt/bt.h"
 
@@ -37,10 +36,10 @@ void loop() {
     // read key status and send key events
     // read imu and send mouse motion events / mouse click events
     // update display as needed
-    if(bt::bluetooth.available())  // If the bluetooth sent any characters
+    if(bt::available())  // If the bluetooth sent any characters
     {
         // Send any characters the bluetooth prints to the serial monitor
-        Serial.print((char)bt::bluetooth.read());
+        Serial.print((char)bt::read());
     }
     if(Serial.available())  // If stuff was typed in the serial monitor
     {
@@ -48,7 +47,7 @@ void loop() {
         switch (ch) {
             default:
                 Serial.print(ch);
-                bt::bluetooth.print(ch);
+                bt::print(ch);
         }
     }
     if (digitalRead(bt::baud_rate_pin) == HIGH) {
