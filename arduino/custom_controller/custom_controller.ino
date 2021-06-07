@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "bt/bt.h"
+#include "bt.h"
 
 const int loopdelay = 8 ;  // number of milliseconds for main loop to run, used to calculate how long to sleep when
                            // exiting main loop

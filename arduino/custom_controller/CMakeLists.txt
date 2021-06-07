@@ -8,12 +8,11 @@ set(ARDUINO_CPU atmega2560)
 project(${PROJECT_NAME})
 
 # Define additional source and header files or default arduino sketch files
-set(${PROJECT_NAME}_SRCS "${PROJECT_SOURCE_DIR}/library")
-set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/library")
+# set(${PROJECT_NAME}_SRCS)
 # set(${PROJECT_NAME}_HDRS)
 
 ### Additional static libraries to include in the target.
-# set(${PROJECT_NAME}_LIBS)
+set(${PROJECT_NAME}_ARDLIBS "SoftwareSerial")
 
 ### Main sketch file
 set(${PROJECT_NAME}_SKETCH custom_controller.ino)

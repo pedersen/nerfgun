@@ -2,7 +2,7 @@
 // Created by marvin on 6/3/21.
 //
 
-#include "bt/bt.h"
+#include "bt.h"
 #include <SoftwareSerial.h>
 
 namespace bt {
