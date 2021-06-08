@@ -19,7 +19,6 @@ namespace bt {
     const int cmd_delay = 500; // how much to delay after starting command mode
     void setup() {
         switch_baud_rate();
-        bluetooth.begin(running_baudrate);
         //bluetooth.println("C");
         Serial.println("done config!");
     }
