@@ -36,26 +36,16 @@ void loop() {
     // read key status and send key events
     // read imu and send mouse motion events / mouse click events
     // update display as needed
-    if(bt::available())  // If the bluetooth sent any characters
-    {
-        // Send any characters the bluetooth prints to the serial monitor
-        Serial.print((char)bt::read());
+    while (bt::available()) {
+        Serial.print(bt::read());
     }
-    if(Serial.available())  // If stuff was typed in the serial monitor
-    {
-        char ch = (char)Serial.read();
-        switch (ch) {
-            default:
-                Serial.print(ch);
-                bt::print(ch);
-        }
+    while (Serial.available()) {
+        bt::print(Serial.read());
     }
     if (digitalRead(bt::baud_rate_pin) == HIGH) {
-        Serial.println("Switching baud rate");
         bt::switch_baud_rate();
     }
     if (digitalRead(bt::config_pin) == HIGH) {
-        Serial.println("Applying configuration");
         bt::reset();
     }
 }

@@ -15,10 +15,10 @@ namespace bt {
     extern void setup();
     extern void reset();
     extern void switch_baud_rate();
-    extern void start_command_mode();
+    extern void start_command_mode(int multiplier);
     extern int available();
     extern int read();
-    extern size_t print(char ch);
+    extern size_t print(int ch);
     extern size_t print(String str);
     extern size_t println(String str);
 }
