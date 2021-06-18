@@ -1,17 +1,13 @@
-/*
-  Example Bluetooth Serial Passthrough Sketch
- by: Jim Lindblom
- SparkFun Electronics
- date: February 26, 2013
- license: Public domain
-
- This example sketch converts an RN-42 bluetooth module to
- communicate at 9600 bps (from 115200), and passes any serial
- data between Serial Monitor and bluetooth module.
- */
 #include <SoftwareSerial.h>
 
-const int serial_baud_rate = 9600 ;
+/*
+ * openGLCD - https://bitbucket.org/bperrybap/openglcd/wiki/Home
+ */
+
+#include <openGLCD.h>
+#include <Adafruit_BNO055.h>
+
+const int serial_baud_rate = 9600;
 const int bluetoothTx = 10;  // TX-O pin of bluetooth mate, Arduino D2
 const int bluetoothRx = 11;  // RX-I pin of bluetooth mate, Arduino D3
 const long int init_baudrate = 115200;  // bluetooth speed during initialization, bluesmirf starts at this speed
@@ -24,9 +20,16 @@ const int baud_rate_pin = 2;
 const int config_pin = 4;
 
 const int loopdelay = 8;  // number of milliseconds for main loop to run, used to calculate how long to sleep when
-                          // exiting main loop
+// exiting main loop
 unsigned long previousMillis = 0;  // will store last time loop was run, start with 0 for when the system starts up
+const int refreshdelay = 250;  // number of milliseconds between screen refreshes
+unsigned long previousRefreshMillis = 0;  // last milli that the display was refreshed, to limit how often we try to
+// update the screen
+
 SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+gText textArea;
 
 void start_command_mode(int multiplier = 1) {
     Serial.println("$$$ ::: Entering command mode");
@@ -34,7 +37,7 @@ void start_command_mode(int multiplier = 1) {
     delay(cmd_delay * multiplier);
 }
 
-void send_command(String command, String message, int multiplier=1) {
+void send_command(String command, String message, int multiplier = 1) {
     Serial.println(command + " ::: " + message);
     bluetooth.println(command);
     delay(cmd_delay * multiplier);
@@ -67,12 +70,23 @@ void apply_config() {
     switch_baud_rate();
     Serial.println("Settings applied, bluetooth rebooted");
 }
-void setup()
-{
+
+void setup() {
     Serial.begin(serial_baud_rate);  // Begin the serial monitor at 9600bps
     switch_baud_rate();
     pinMode(baud_rate_pin, INPUT);
     pinMode(config_pin, INPUT);
+    Serial.println("Initializing Display");
+    GLCD.Init();   // initialise the library, non inverted writes pixels onto a clear screen
+    GLCD.ClearScreen();
+    GLCD.SelectFont(System5x7); // default fixed width system font
+    /* Initialise the sensor */
+    if (!bno.begin()) {
+        /* There was a problem detecting the BNO055 ... check your connections */
+        GLCD.DrawString("No BNO055 detected", 3, 3);
+        while (1);
+    }
+
     Serial.println("setup complete!");
 }
 
@@ -80,6 +94,16 @@ void loop() {
     unsigned long currentmillis = millis();
     if ((currentmillis - previousMillis) < loopdelay) {
         return; // not enough time has passed, and we are limiting ourselves to run once every loopdelay ms
+    }
+    previousMillis = currentmillis;
+    if ((currentmillis - previousRefreshMillis) >= refreshdelay) {
+        uint8_t system, gyro, accel, mag = 0;
+        bno.getCalibration(&system, &gyro, &accel, &mag);
+
+        char calibration[44];
+        sprintf(calibration, "Sys:%d Gyr:%d Acc:%d Mag:%d Ms:%lu", system, gyro, accel, mag, currentmillis);
+        GLCD.DrawString(calibration, 0, 0, eraseFULL_LINE);
+        previousRefreshMillis = currentmillis;
     }
 /*
     if (bluetooth.availableForWrite() == 0) {
@@ -89,14 +113,14 @@ void loop() {
     // read key status and send key events
     // read imu and send mouse motion events / mouse click events
     // update display as needed
-    while(bluetooth.available() > 0)  // If the bluetooth sent any characters
+    while (bluetooth.available() > 0)  // If the bluetooth sent any characters
     {
         // Send any characters the bluetooth prints to the serial monitor
-        Serial.print((char)bluetooth.read());
+        Serial.print((char) bluetooth.read());
     }
-    while(Serial.available() > 0)  // If stuff was typed in the serial monitor
+    while (Serial.available() > 0)  // If stuff was typed in the serial monitor
     {
-        bluetooth.print((char)Serial.read());
+        bluetooth.print((char) Serial.read());
     }
     if (digitalRead(baud_rate_pin) == HIGH) {
         switch_baud_rate();
@@ -104,5 +128,4 @@ void loop() {
     if (digitalRead(config_pin) == HIGH) {
         apply_config();
     }
-    // and loop forever and ever!
 }
