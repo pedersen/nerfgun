@@ -450,21 +450,21 @@ CMakeFiles/mega_SoftwareSerial.dir/clean:
 # Target rules for target CMakeFiles/custom_controller.dir
 
 # All Build rule for target.
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_imumaths.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd_types.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_Adafruit_Sensor.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_gText.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_CORE.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_allBitmaps.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_openGLCD.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_Wire.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_openGLCD_Buildinfo.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_imumaths.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd_errno.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_allFonts.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd_Device.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_Adafruit_BNO055.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_SoftwareSerial.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_Adafruit_Sensor.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd_errno.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_allFonts.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_openGLCD_Buildinfo.dir/all
-CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_glcd_types.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_openGLCD.dir/all
+CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_Wire.dir/all
 CMakeFiles/custom_controller.dir/all: CMakeFiles/mega_twi.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_controller.dir/build.make CMakeFiles/custom_controller.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/custom_controller.dir/build.make CMakeFiles/custom_controller.dir/build
