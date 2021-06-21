@@ -1,0 +1,2 @@
+CMakeFiles/mega_CORE.dir/opt/arduino1.8.15/hardware/arduino/avr/cores/arduino/WMath.cpp.obj: \
+ /opt/arduino1.8.15/hardware/arduino/avr/cores/arduino/WMath.cpp

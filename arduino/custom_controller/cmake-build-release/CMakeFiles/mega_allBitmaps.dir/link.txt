@@ -1,0 +1,2 @@
+/opt/arduino1.8.15/hardware/tools/avr/bin/avr-ar qc libmega_allBitmaps.a CMakeFiles/mega_allBitmaps.dir/libs/openGLCD/gText.cpp.obj CMakeFiles/mega_allBitmaps.dir/libs/openGLCD/glcd.cpp.obj CMakeFiles/mega_allBitmaps.dir/libs/openGLCD/glcd_Device.cpp.obj CMakeFiles/mega_allBitmaps.dir/libs/openGLCD/openGLCD.c.obj
+/opt/arduino1.8.15/hardware/tools/avr/bin/avr-ranlib libmega_allBitmaps.a
