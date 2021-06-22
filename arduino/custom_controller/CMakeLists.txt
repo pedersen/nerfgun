@@ -13,6 +13,7 @@ set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/bt.h")
 
 ### Additional static libraries to include in the target.
 set(${PROJECT_NAME}_ARDLIBS "SoftwareSerial")
+#set("${PROJECT_NAME}_LIBS" "")
 
 ### Main sketch file
 set(${PROJECT_NAME}_SKETCH custom_controller.ino)
@@ -23,12 +24,10 @@ set(${PROJECT_NAME}_SKETCH custom_controller.ino)
 ### Additional settings to add non-standard or your own Arduino libraries.
 # For this example (libs will contain additional arduino libraries)
 # An Arduino library my_lib will contain files in libs/my_lib/: my_lib.h, my_lib.cpp + any other cpp files
-link_directories("${PROJECT_SOURCE_DIR}/libs")
+#link_directories("${PROJECT_SOURCE_DIR}/libs")
 
 # For nested library sources replace ${LIB_NAME} with library name for each library
-set(openGLCD_RECURSE true)
-set(Adafruit_BNO055_RECURSE true)
-set(Adafruit_Sensor_RECURSE true)
+#set(_RECURSE true)
 
 #### Additional settings for programmer. From programmers.txt
 set(${PROJECT_NAME}_PROGRAMMER avrisp)
