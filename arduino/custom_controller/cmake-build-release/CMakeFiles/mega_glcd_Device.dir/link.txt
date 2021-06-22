@@ -1,2 +1,0 @@
-/opt/arduino1.8.15/hardware/tools/avr/bin/avr-ar qc libmega_glcd_Device.a CMakeFiles/mega_glcd_Device.dir/libs/openGLCD/gText.cpp.obj CMakeFiles/mega_glcd_Device.dir/libs/openGLCD/glcd.cpp.obj CMakeFiles/mega_glcd_Device.dir/libs/openGLCD/glcd_Device.cpp.obj CMakeFiles/mega_glcd_Device.dir/libs/openGLCD/openGLCD.c.obj
-/opt/arduino1.8.15/hardware/tools/avr/bin/avr-ranlib libmega_glcd_Device.a
