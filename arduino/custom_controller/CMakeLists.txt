@@ -26,7 +26,9 @@ set(${PROJECT_NAME}_SKETCH custom_controller.ino)
 link_directories("${PROJECT_SOURCE_DIR}/libs")
 
 # For nested library sources replace ${LIB_NAME} with library name for each library
-# set(_RECURSE true)
+set(openGLCD_RECURSE true)
+set(Adafruit_BNO055_RECURSE true)
+set(Adafruit_Sensor_RECURSE true)
 
 #### Additional settings for programmer. From programmers.txt
 set(${PROJECT_NAME}_PROGRAMMER avrisp)
