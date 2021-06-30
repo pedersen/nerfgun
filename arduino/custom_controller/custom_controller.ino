@@ -203,6 +203,11 @@ void loop() {
         char loops_per_second_str[20];
         sprintf(loops_per_second_str, "Loops/Second: %d", loops_per_second);
         GLCD.DrawString(loops_per_second_str, 0, 24, eraseFULL_LINE);
+        char orientation_str[18];
+        hid::bno.getEvent(&hid::orientationData, Adafruit_BNO055::VECTOR_EULER);
+        sprintf(orientation_str, "X: %d Y: %d Z: %d", int(hid::orientationData.orientation.heading), int(hid::orientationData.orientation.pitch), int(hid::orientationData.orientation.heading));
+        GLCD.DrawString(orientation_str, 0, 32, eraseFULL_LINE);
+        // X: 123 Y: 456 z: 789
     }
 
     // pass any serial traffic over the USB Serial for debugging
