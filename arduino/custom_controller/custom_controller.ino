@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h>
-
 // https://bitbucket.org/bperrybap/openglcd/wiki/Home
 #include <openGLCD.h>
 #include <Adafruit_BNO055.h>

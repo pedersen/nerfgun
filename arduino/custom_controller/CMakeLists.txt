@@ -12,7 +12,7 @@ set(${PROJECT_NAME}_SRCS "${PROJECT_SOURCE_DIR}/bt.ino")
 set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/bt.h" "${PROJECT_SOURCE_DIR}/keyboard.h" "${PROJECT_SOURCE_DIR}/mouse.h")
 
 ### Additional static libraries to include in the target.
-set(${PROJECT_NAME}_ARDLIBS "SoftwareSerial")
+#set(${PROJECT_NAME}_ARDLIBS)
 #set("${PROJECT_NAME}_LIBS" "")
 
 ### Main sketch file
