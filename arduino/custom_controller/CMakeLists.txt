@@ -9,7 +9,7 @@ project(${PROJECT_NAME})
 
 # Define additional source and header files or default arduino sketch files
 set(${PROJECT_NAME}_SRCS "${PROJECT_SOURCE_DIR}/bt.ino")
-set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/bt.h")
+set(${PROJECT_NAME}_HDRS "${PROJECT_SOURCE_DIR}/bt.h" "${PROJECT_SOURCE_DIR}/keyboard.h" "${PROJECT_SOURCE_DIR}/mouse.h")
 
 ### Additional static libraries to include in the target.
 set(${PROJECT_NAME}_ARDLIBS "SoftwareSerial")

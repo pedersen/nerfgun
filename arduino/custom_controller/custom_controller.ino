@@ -5,105 +5,155 @@
 #include <Adafruit_BNO055.h>
 
 #include "keyboard.h"
+#include "mouse.h"
 
 const int serial_baud_rate = 9600;
-const int bluetoothTx = 10;  // TX-O pin of bluetooth mate, Arduino D2
-const int bluetoothRx = 11;  // RX-I pin of bluetooth mate, Arduino D3
-const long int init_baudrate = 115200;  // bluetooth speed during initialization, bluesmirf starts at this speed
-const int running_baudrate = 19200;  // bluetooth speed after initialization
-const String running_baudrate_str = "19.2"; // bluetooth baud rate as string for the bt modem
-const String device_name = "Nerf AR-L Controller";
-const int cmd_delay = 500; // how much to delay after starting command mode (in ms)
-
-const int baud_rate_pin = 2;
-const int config_pin = 4;
-
 const int loopdelay = 8;  // number of milliseconds for main loop to run, used to calculate how long to sleep when exiting main loop
 unsigned long previousMillis = 0;  // will store last time loop was run, start with 0 for when the system starts up
 long int loops = 0;  // number of times loop() has been called
 const int refreshdelay = 250;  // number of milliseconds between screen refreshes
 unsigned long previousRefreshMillis = 0;  // last milli that the display was refreshed, to limit how often we try to update the screen
 
-SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
-typedef void (*Operation)(uint8_t);
-typedef struct {
-    uint8_t number;
-    Operation op;
-    byte code;
-    unsigned long transition;
-    byte state;
-} input_pin;
+namespace pinmap {
+    const int baud_rate_pin = 2;
+    const int config_pin = 4;
+    // TX-O pin of bluetooth mate, Arduino D2
+    const int bluetoothTx = 10;
+    // RX-I pin of bluetooth mate, Arduino D3
+    const int bluetoothRx = 11;
+}
+namespace bluetooth {
+    // bluetooth speed during initialization, bluesmirf starts at this speed
+    const long int init_baudrate = 115200;
+    // bluetooth speed after initialization
+    const int running_baudrate = 19200;
+    // bluetooth baud rate as string for the bt modem
+    const String running_baudrate_str = "19.2";
+    const String device_name = "Nerf AR-L Controller";
+    // how much to delay after starting command mode (in ms)
+    const int cmd_delay = 500;
 
-void start_command_mode(int multiplier = 1) {
-    Serial.println("$$$ ::: Entering command mode");
-    bluetooth.print("$$$");
-    delay(cmd_delay * multiplier);
+    SoftwareSerial bluetooth(pinmap::bluetoothTx, pinmap::bluetoothRx);
+
+    void start_command_mode(int multiplier = 1) {
+        Serial.println("$$$ ::: Entering command mode");
+        bluetooth.print("$$$");
+        delay(cmd_delay * multiplier);
+    }
+
+    void send_command(String command, String message, int multiplier = 1) {
+        Serial.println(command + " ::: " + message);
+        bluetooth.println(command);
+        delay(cmd_delay * multiplier);
+    }
+
+    void end_command_mode() {
+        bluetooth.println("---");
+    }
+
+    void switch_baud_rate(uint8_t code, int state) {
+        Serial.println("Switching baud rate");
+        bluetooth.begin(init_baudrate);
+        start_command_mode();
+        send_command("U," + running_baudrate_str + ",N", "Changing baudrate to " + running_baudrate_str);
+        bluetooth.begin(running_baudrate);
+        delay(cmd_delay);
+        end_command_mode();
+    }
+
+    void apply_config(uint8_t code, int state) {
+        Serial.println("Applying bluetooth config");
+        start_command_mode();
+        send_command("SM,6", "Switch to Pairing Mode (vs Slave, Master, DTR)");
+        send_command("SO,%", "Print out CONNECT/DISCONNECT messages for debugging");
+        send_command("SH,0033", "Set HID flags to be keyboard/combo mouse");
+        send_command("S~,6", "Switch to HID mode");
+        send_command("SN," + device_name, "Set device name");
+        send_command("SQ,16", "Switch to low latency mode");
+        send_command("R,1", "Reboot", 5);
+        switch_baud_rate(KEY_RESERVED, LOW);
+        Serial.println("Settings applied, bluetooth rebooted");
+    }
 }
 
-void send_command(String command, String message, int multiplier = 1) {
-    Serial.println(command + " ::: " + message);
-    bluetooth.println(command);
-    delay(cmd_delay * multiplier);
+namespace hid {
+    Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+    sensors_event_t orientationData;
+
+    void modkey_down(uint8_t code, int state) {
+
+    }
+
+    void modkey_up(uint8_t code, int state) {
+
+    }
+
+    void toggle_modkey(uint8_t code, int state) {
+
+    }
+
+    void key_down(uint8_t code, int state) {
+
+    }
+
+    void key_up(uint8_t code, int state) {
+
+    }
+
+    void toggle_key(uint8_t code, int state) {
+
+    }
+
+    void send_key_state(uint8_t code=KEY_RESERVED, int state=LOW) {
+
+    }
+
+    void mouse_button_down(uint8_t button_num, int state) {
+
+    }
+
+    void mouse_button_up(uint8_t button_num, int state) {
+
+    }
+
+    void toggle_mouse_button(uint8_t button_num, int state) {
+
+    }
+
+    void send_mouse_state(uint8_t button_num=MOUSE_RESERVED, int state=LOW) {
+        // read imu and send mouse motion events / mouse click events
+        hid::bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+    }
+
+    void send_hid_state() {
+        send_key_state();
+        send_mouse_state();
+    }
 }
 
-void end_command_mode() {
-    bluetooth.println("---");
+namespace pinconfig {
+
+    typedef void (*Operation)(uint8_t, int);
+
+    typedef struct {
+        uint8_t number;
+        Operation op;
+        byte code;
+        unsigned long transition;
+        byte state;
+    } input_pin;
+
+    input_pin pins[] = {
+            {pinmap::baud_rate_pin, bluetooth::switch_baud_rate, KEY_RESERVED, 0, LOW},
+            {pinmap::config_pin,    bluetooth::apply_config,     KEY_RESERVED, 0, LOW},
+    };
 }
-
-void switch_baud_rate(uint8_t code) {
-    Serial.println("Switching baud rate");
-    bluetooth.begin(init_baudrate);
-    start_command_mode();
-    send_command("U," + running_baudrate_str + ",N", "Changing baudrate to " + running_baudrate_str);
-    bluetooth.begin(running_baudrate);
-    delay(cmd_delay);
-    end_command_mode();
-}
-
-void apply_config(uint8_t code) {
-    Serial.println("Applying bluetooth config");
-    start_command_mode();
-    send_command("SM,6", "Switch to Pairing Mode (vs Slave, Master, DTR)");
-    send_command("SO,%", "Print out CONNECT/DISCONNECT messages for debugging");
-    send_command("SH,0033", "Set HID flags to be keyboard/combo mouse");
-    send_command("S~,6", "Switch to HID mode");
-    send_command("SN," + device_name, "Set device name");
-    send_command("SQ,16", "Switch to low latency mode");
-    send_command("R,1", "Reboot", 5);
-    switch_baud_rate(0);
-    Serial.println("Settings applied, bluetooth rebooted");
-}
-
-void send_key(uint8_t code) {
-
-}
-void send_modifier(uint8_t code) {
-
-}
-void send_button(uint8_t code) {
-
-}
-void send_mouse(uint8_t code) {
-
-}
-
-input_pin keypins[] = {
-        {baud_rate_pin, switch_baud_rate, KEY_RESERVED, 0, LOW},
-        {config_pin, apply_config, KEY_RESERVED, 0, LOW},
-};
-input_pin modpins[] = {
-
-};
-input_pin mouse_buttons[] = {
-
-};
 
 void setup() {
     Serial.begin(serial_baud_rate);  // Begin the serial monitor at 9600bps
-    switch_baud_rate(0);
-    for (auto & keypin : keypins) {
+    bluetooth::switch_baud_rate(KEY_RESERVED, LOW);
+    for (auto & keypin : pinconfig::pins) {
         pinMode(keypin.number, INPUT);
         keypin.transition = 0;
     }
@@ -112,7 +162,7 @@ void setup() {
     GLCD.ClearScreen();
     GLCD.SelectFont(System5x7); // default fixed width system font
     /* Initialise the sensor */
-    if (!bno.begin()) {
+    if (!hid::bno.begin()) {
         /* There was a problem detecting the BNO055 ... check your connections */
         GLCD.DrawString("No BNO055 detected", 3, 3);
         while (true);
@@ -140,7 +190,7 @@ void loop() {
     // don't update the display if we haven't had enough time pass
     if ((currentmillis - previousRefreshMillis) >= refreshdelay) {
         uint8_t system, gyro, accel, mag = 0;
-        bno.getCalibration(&system, &gyro, &accel, &mag);
+        hid::bno.getCalibration(&system, &gyro, &accel, &mag);
 
         char calibration[44];
         sprintf(calibration, "S:%d G:%d A:%d M:%d", system, gyro, accel, mag);
@@ -160,33 +210,33 @@ void loop() {
         GLCD.DrawString(loops_per_second_str, 0, 24, eraseFULL_LINE);
     }
 
-
     // pass any serial traffic over the USB Serial for debugging
-    while (bluetooth.available() > 0) { // If the bluetooth sent any characters
-        Serial.print((char) bluetooth.read());
+    while (bluetooth::bluetooth.available() > 0) { // If the bluetooth sent any characters
+        Serial.print((char) bluetooth::bluetooth.read());
     }
     while (Serial.available() > 0) { // If stuff was typed in the serial monitor
-        bluetooth.print((char) Serial.read());
+        bluetooth::bluetooth.print((char) Serial.read());
     }
 
     // read key status and send key events
-    // read imu and send mouse motion events / mouse click events
     // update display as needed
-    sensors_event_t orientationData;
-    bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-
-    for (auto & keypin : keypins) {
-        if (digitalRead(keypin.number) == HIGH) {
-            keypin.op(keypin.code);
+    for (auto & pin : pinconfig::pins) {
+        int state = digitalRead(pin.number);
+        if (state != pin.state) {
+            pin.transition = currentmillis;
+            pin.state = state;
+            pin.op(pin.code, state);
         }
     }
+
+    hid::send_hid_state();
     /*
     # get position at start to ensure relative positioning
     speed = Point(1, 1, 1)
     origin = Point(*bno.read_euler())
     now = time.time()
 
-    keypins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
+    pins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in keycfgs.items()]
     modpins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in modcfgs.items()]
     mousepins = [PinState(pin, GPIO.LOW, now, key) for (pin, key) in mouse.items()]
 
@@ -220,7 +270,7 @@ void loop() {
                 pin.state = state
                 pin.transition = now
 
-        for pin in keypins:
+        for pin in pins:
             state = GPIO.input(pin.pinnum)
             if state != pin.state:
                 if state == GPIO.HIGH:
