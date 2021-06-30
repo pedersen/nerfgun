@@ -14,7 +14,6 @@ long int loops = 0;  // number of times loop() has been called
 const int refreshdelay = 250;  // number of milliseconds between screen refreshes
 unsigned long previousRefreshMillis = 0;  // last milli that the display was refreshed, to limit how often we try to update the screen
 
-
 namespace pinmap {
     const int baud_rate_pin = 2;
     const int config_pin = 4;
@@ -34,30 +33,28 @@ namespace bluetooth {
     // how much to delay after starting command mode (in ms)
     const int cmd_delay = 500;
 
-    SoftwareSerial bluetooth(pinmap::bluetoothTx, pinmap::bluetoothRx);
-
     void start_command_mode(int multiplier = 1) {
         Serial.println("$$$ ::: Entering command mode");
-        bluetooth.print("$$$");
+        Serial1.print("$$$");
         delay(cmd_delay * multiplier);
     }
 
     void send_command(String command, String message, int multiplier = 1) {
         Serial.println(command + " ::: " + message);
-        bluetooth.println(command);
+        Serial1.println(command);
         delay(cmd_delay * multiplier);
     }
 
     void end_command_mode() {
-        bluetooth.println("---");
+        Serial1.println("---");
     }
 
     void switch_baud_rate(uint8_t code, int state) {
         Serial.println("Switching baud rate");
-        bluetooth.begin(init_baudrate);
+        Serial1.begin(init_baudrate);
         start_command_mode();
         send_command("U," + running_baudrate_str + ",N", "Changing baudrate to " + running_baudrate_str);
-        bluetooth.begin(running_baudrate);
+        Serial1.begin(running_baudrate);
         delay(cmd_delay);
         end_command_mode();
     }
@@ -211,11 +208,11 @@ void loop() {
     }
 
     // pass any serial traffic over the USB Serial for debugging
-    while (bluetooth::bluetooth.available() > 0) { // If the bluetooth sent any characters
-        Serial.print((char) bluetooth::bluetooth.read());
+    while (Serial1.available() > 0) { // If the bluetooth sent any characters
+        Serial.print((char) Serial1.read());
     }
     while (Serial.available() > 0) { // If stuff was typed in the serial monitor
-        bluetooth::bluetooth.print((char) Serial.read());
+        Serial1.print((char) Serial.read());
     }
 
     // read key status and send key events
